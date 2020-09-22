@@ -1,0 +1,43 @@
+---
+title: "Per_farmer_page_layout"
+output: html_document
+---
+
+#```{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = FALSE)
+#library(tidyverse)
+#```
+
+### Inputs:
+```{r}
+fname_data = "../res/test_data_Lrigidum_20200910.txt"
+name_farmer = "Adam"
+list_herbicides = c("Clethodim_SURVIVAL_RATE", "Glyphosate_SURVIVAL_RATE", "Sulfometuron_SURVIVAL_RATE", "Terbuthylazine_SURVIVAL_RATE")
+dat = read.delim(fname_data, header=TRUE, na.string="#N/A")
+subdat = dat[dat$Farmer_Agronomist==name_farmer, ]
+```
+### Summary statistics:
+```{r}
+par(mfrow=c(2,2))
+for (name_herbicide in list_herbicides){
+  # name_herbicide = list_herbicides[3]
+  resistance = eval(parse(text=paste0("dat$", name_herbicide)))
+  resistance = resistance[!is.na(resistance)]
+  subdat_resistance = eval(parse(text=paste0("subdat$", name_herbicide)))
+  if (sum(!is.na(subdat_resistance))==0){
+    plot(x=0:1, y=0:1, type="n", xlab=name_herbicide, ylab="")
+    text(x=0.5, y=0.5, lab="NO DATA")
+  } else {
+    # plot(density(resistance, adjust=1), main="", xlab=name_herbicide)
+    hist(resistance, col=rgb(0.5,0.5,0.5,alpha=0.6), nclass=10, bord=FALSE, main="", xlab=name_herbicide)
+    grid()
+    list_colors = rainbow(nrow(subdat))
+    list_percentile = c()
+    for (i in 1:nrow(subdat)){
+      abline(v=subdat_resistance[i], col=list_colors[i], lwd=2)
+      list_percentile = c(list_percentile, sum(resistance<=subdat_resistance[i])/length(resistance))
+    }
+    legend("topright", legend=paste0(subdat$Location[!is.na(subdat_resistance)], " (percentile=", round(list_percentile[!is.na(subdat_resistance)]*100), "%)"), col=list_colors[!is.na(subdat_resistance)], lwd=2)
+  }
+}
+```
