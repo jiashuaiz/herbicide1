@@ -3,11 +3,6 @@ title: "Per_farmer_page_layout"
 output: html_document
 ---
 
-#```{r setup, include=FALSE}
-#knitr::opts_chunk$set(echo = FALSE)
-#library(tidyverse)
-#```
-
 ### Inputs:
 ```{r}
 fname_data = "../res/test_data_Lrigidum_20200910.txt"
@@ -16,7 +11,7 @@ list_herbicides = c("Clethodim_SURVIVAL_RATE", "Glyphosate_SURVIVAL_RATE", "Sulf
 dat = read.delim(fname_data, header=TRUE, na.string="#N/A")
 subdat = dat[dat$Farmer_Agronomist==name_farmer, ]
 ```
-### Summary statistics:
+### Histograms:
 ```{r}
 par(mfrow=c(2,2))
 for (name_herbicide in list_herbicides){
@@ -28,7 +23,7 @@ for (name_herbicide in list_herbicides){
     plot(x=0:1, y=0:1, type="n", xlab=name_herbicide, ylab="")
     text(x=0.5, y=0.5, lab="NO DATA")
   } else {
-    # plot(density(resistance, adjust=1), main="", xlab=name_herbicide)
+    # plot(density(resistance, adjust=1), main="", xab=name_herbicide)
     hist(resistance, col=rgb(0.5,0.5,0.5,alpha=0.6), nclass=10, bord=FALSE, main="", xlab=name_herbicide)
     grid()
     list_colors = rainbow(nrow(subdat))
@@ -41,3 +36,85 @@ for (name_herbicide in list_herbicides){
   }
 }
 ```
+
+## Radar charts
+- not good with unbalanced data (lots of missing data)
+```{r}
+# library(fmsb)
+# X = subdat[,13:16]
+# colnames(X) = c("Clethodim", "Glyphosate", "Sulfometuron", "Terbuthylazine")
+# radarchart(X)
+```
+
+## Map
+```{r}
+library(maps)
+orig_par = par(no.readonly=TRUE)
+for (herbicide in c("Clethodim", "Glyphosate", "Sulfometuron", "Terbuthylazine")){
+  # herbicide = "Glyphosate"
+  
+  if ( sum(!is.na(eval(parse(text=paste0("subdat$", herbicide, "_SURVIVAL_RATE"))))) == 0 ){
+    next
+  }
+  
+  landscape_gradient = readRDS(paste0("../res/landscape_surfaces_gradient_data_", herbicide, ".rds"))
+  predx = landscape_gradient$predx
+  predy = landscape_gradient$predy
+  Z = landscape_gradient$Z
+  
+  ncolors = 25 ### 25 is a nice number to see dicrete contour lines across the landscape methinks...
+  color_gradient = rev(colorRampPalette(c("#A50026","#D73027","#F46D43","#FDAE61","#FEE08B","#FFFFBF","#D9EF8B","#A6D96A","#66BD63","#1A9850","#006837"))(ncolors))
+  
+  par(orig_par)
+  layout(matrix(c(rep(1,5),2),nrow=1))
+  ### define x-y limits
+  dx=c(min(predx), max(predx))
+  dy=c(min(predy), max(predy))
+  xaxis = seq(round(min(predx)), round(max(predx)), 2)
+  yaxis = seq(round(min(predy))-2, round(max(predy))+2, 2)
+  ### prepare the box enclosing the map
+  plot(0, xlim=dx, ylim=dy, asp=1, type="n", xlab="Longitude", ylab="Latitdue", main=paste0(herbicide, " Resistance Gradient"), xaxt="n", yaxt="n") #empty
+  ### overlay the heatmap
+  par(new=TRUE)
+  image(x=predx, y=predy, z=Z, col=color_gradient[round(min(Z)*ncolors):round(max(Z)*ncolors)], xlab="", ylab="", main="", asp=1, xaxt="n", yaxt="n")
+  ### extract the bounding box of the map
+  outline = maps::map("world", plot=FALSE)
+  xrange = range(outline$x, na.rm=TRUE)
+  yrange = range(outline$y, na.rm=TRUE)
+  xbox = xrange + c(-2, 2)
+  ybox = yrange + c(-2, 2)
+  ### draw the outline of the map and color the water blue
+  polypath(c(outline$x, NA, c(xbox, rev(xbox))),
+         c(outline$y, NA, rep(ybox, each=2)),
+         col="light blue", rule="evenodd")
+  ### name the ticks with degree signs ("\U00B0")
+  axis(side=1, at=xaxis, labels=paste0(xaxis, "\U00B0"))
+  axis(side=2, at=yaxis, labels=paste0(yaxis, "\U00B0"),las=2)
+  ### add a grid 'cause it looks noice
+  grid(col="darkgray")
+  ### plot points
+  par(new=TRUE)
+  plot(0, xlim=dx, ylim=dy, asp=1, type="n", xlab="", ylab="", main="", xaxt="n", yaxt="n") #empty
+  # plot(0, xlim=dx, ylim=dy, asp=1, type="n", xlab="", ylab="", main="")
+  for (i in 1:nrow(subdat)){
+    x = subdat$Coordinates_E[i]
+    y = subdat$Coordinates_N[i]
+    r = eval(parse(text=paste0("subdat$", herbicide, "_SURVIVAL_RATE")))[i]
+    if (!is.na(r)){
+      points(x, y, col="black", bg=color_gradient[round(r*ncolors)+1], pch=19)
+      text(x, y, lab=subdat$Location[i], pos=1)
+    }
+  }
+  ### plot heat map legend
+  legend_x=seq(from=0,to=1, length=length(color_gradient))
+  legend_y=seq(from=0, to=1, length=length(color_gradient))
+  legend_z = matrix(rep(legend_x, times=length(color_gradient)), byrow=TRUE, nrow=length(color_gradient))
+  plot(x=c(0,1), y=c(0,1), type="n", xlab="", ylab="", xaxt="n", yaxt="n", main="")
+  par(new=TRUE)
+  image(x=legend_x, y=legend_y, z=legend_z, col=color_gradient, xlab="", ylab="", main="", xaxt="n", las=2)
+  mtext("Completely\nResistant", side=3, line=0.5, at=0.5, cex=0.5)
+  mtext("Completely\nSusceptible", side=1, line=1.5, at=0.5, cex=0.5)
+}
+```
+
+
