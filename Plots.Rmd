@@ -6,11 +6,12 @@ knitr::opts_chunk$set(echo = F)
 ```
 
 ### Histograms of the herbicide resistance level
-The plots show herbicide resistance of "Clethodim", "Glyphosate", "Sulfometuron", and "Terbuthylazine".
-You can see your situation compared to other neighbours; wherein the highlighted lines indicate where you are.
+The following plots show herbicide resistance of "Clethodim", "Glyphosate", "Sulfometuron", and "Terbuthylazine".
+You can see your situation (highlighted lines) compared to other neighbour farms
 ```{r, Histograms}
-par(mfrow=c(2,2))
+par(mfrow=c(2,2), xpd=TRUE, mar=c(4,4,4,4))
 for (name_herbicide in list_herbicides){
+  # name_herbicide = list_herbicides[3]
   resistance = eval(parse(text=paste0("dat$", name_herbicide)))
   resistance = resistance[!is.na(resistance)]
   subdat_resistance = eval(parse(text=paste0("subdat$", name_herbicide)))
@@ -18,18 +19,19 @@ for (name_herbicide in list_herbicides){
     plot(x=0:1, y=0:1, type="n", xlab=name_herbicide, ylab="")
     text(x=0.5, y=0.5, lab="NO DATA")
   } else {
-    hist(resistance, col=rgb(0.5,0.5,0.5,alpha=0.6), nclass=10, bord=FALSE, main="", xlab=name_herbicide)
+    hist(resistance, col=rgb(0.5,0.5,0.5,alpha=0.6), breaks=10, bord=FALSE, main="", xlim = c(0,1), xlab=name_herbicide, ylim = c(0,10), ylab="Frequency")
+    par(xpd=F)
     grid()
-    list_colors = rev(rainbow(nrow(subdat)))
     list_percentile = c()
+    list_colors = rev(rainbow(nrow(subdat)))
     for (i in 1:nrow(subdat)){
       abline(v=subdat_resistance[i], col=list_colors[i], lwd=2)
-      list_percentile = c(list_percentile, sum(resistance<=subdat_resistance[i])/length(resistance))
+      list_percentile = c(list_percentile, sum(resistance>=subdat_resistance[i])/length(resistance))
     }
-    legend("topright", legend=paste0(subdat$Location[!is.na(subdat_resistance)], " (percentile=", round(list_percentile[!is.na(subdat_resistance)]*100), "%)"), col=list_colors[!is.na(subdat_resistance)], lwd=2)
+    par(xpd=T)
+    legend(x=-0.15, y=14, title="The herbicide resistance situation of your farm in ", legend=paste0(subdat$Location[!is.na(subdat_resistance)], " is lower (better) than other ", round(list_percentile[!is.na(subdat_resistance)]*100), "% farms"), col=list_colors[!is.na(subdat_resistance)], pch=c(19,19), box.col = F, cex=.9)
   }
 }
-
 ```
 
 ### Heatmap of the herbicide resistance level
@@ -40,11 +42,11 @@ orig_par = par(no.readonly=TRUE)
 for (herbicide in c("Clethodim", "Glyphosate", "Sulfometuron", "Terbuthylazine")){
   # herbicide = "Glyphosate"
   
-  if ( sum(!is.na(eval(parse(text=paste0("subdat$", herbicide, "_SURVIVAL_RATE"))))) == 0 ){
+  if (sum(!is.na(eval(parse(text=paste0("subdat$", herbicide, "_SURVIVAL_RATE"))))) == 0 ){
     next
   }
   
-  landscape_gradient = readRDS(paste0("./landscape_surfaces_gradient_data_", herbicide, ".rds"))
+  landscape_gradient = readRDS(paste0("./data/landscape_surfaces_gradient_data_", herbicide, ".rds"))
   predx = landscape_gradient$predx
   predy = landscape_gradient$predy
   Z = landscape_gradient$Z

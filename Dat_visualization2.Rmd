@@ -8,7 +8,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r, Inputs, include=FALSE}
-dat = read.delim("./test_data_Lrigidum_20200910.txt", header=TRUE, na.string="#N/A")
+dat = read.delim("./data/test_data_Lrigidum_20200910.txt", header=TRUE, na.string="#N/A")
 
 list_herbicides = c("Clethodim_SURVIVAL_RATE", "Glyphosate_SURVIVAL_RATE", "Sulfometuron_SURVIVAL_RATE", "Terbuthylazine_SURVIVAL_RATE")
 
@@ -22,19 +22,19 @@ list_subdat <- setNames(list_subdat,list_farmer)
 # print(list_subdat[["Adam"]])
 ```
 
-```{r, OutputsDir, include=FALSE}
-list_html_his = list()
+```{r, OutputsDir, include=T}
+list_html_dir = list()
 for (i in c(1:length(list_farmer))) {
-  list_html_his[i] <- paste0("./Plots/", list_farmer[i],".html")
+  list_html_dir[i] <- paste0("./Plots/", list_farmer[i],".html")
   } #set the output directory
-list_html_his <- setNames(list_html_his,list_farmer)
-print(list_html_his)
+list_html_dir <- setNames(list_html_dir,list_farmer)
+print(list_html_dir)
 ```
 
-```{r, Output, include=FALSE}
+```{r, Output, include=T}
 getwd()
 for (name_farmer in list_farmer) {
   subdat = list_subdat[[name_farmer]]
-  rmarkdown::render("./Plots.Rmd", output_file = list_html_his[[name_farmer]])
+  rmarkdown::render("Plots.Rmd", output_file = list_html_dir[[name_farmer]])
 }
 ```
