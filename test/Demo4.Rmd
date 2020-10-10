@@ -1,0 +1,11 @@
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+```
+
+```{r}
+x <- runif(10)
+hist(x, col=rgb(0.5,0.5,0.5,alpha=0.6), freq=T, breaks=10, bord=FALSE, main="", xlim = c(0,1), xlab="a", ylim = c(0,2))
+```
+
+
+
