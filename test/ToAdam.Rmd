@@ -21,7 +21,7 @@ subdat = dat[dat$Farmer_Agronomist==name_farmer, ]
 ### Histograms:
 Compared to your neighbour farms,
 ```{r}
-# layout(matrix(c(1:8),4,2,byrow = TRUE), TRUE)
+layout(matrix(c(1:8),4,2,byrow = TRUE), TRUE)
 par(mfrow=c(4,2))
 par(mar=c(1,1,1,1))
 
