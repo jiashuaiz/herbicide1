@@ -13,7 +13,7 @@ getwd()
 ```{r}
 fname_data = "C:\\Users\\ALEX\\Desktop\\POP_PHENO_DATA.txt"
 name_farmer = "Brent Alexander"
-list_herbicides = c("Clethodim", "Glyphosate", "Sulfometuron", "Terbuthylazine")
+
 dat = read.delim(fname_data, header=TRUE, na.string="#N/A")
 subdat = dat[dat$Farmer_Agronomist==name_farmer, ]
 ```
@@ -25,38 +25,43 @@ layout(matrix(c(1:8),4,2,byrow = TRUE), TRUE)
 par(mfrow=c(4,2))
 par(mar=c(1,1,1,1))
 
+list_herbicides = c("Clethodim", "Glyphosate", "Sulfometuron", "Terbuthylazine")
+
 for (name_herbicide in list_herbicides){
   
   resistance = eval(parse(text=paste0("dat$", name_herbicide)))
   resistance = resistance[!is.na(resistance)]
   subdat_resistance = eval(parse(text=paste0("subdat$", name_herbicide))) # load sub-dataset of each farmers
   
-  # Histogram
-  
+  ## Histogram
   if (sum(!is.na(subdat_resistance))==0){
     par(fig=c(0,1,0,.8), mar=c(rep(3,4)), xpd=T, new=F)
-    # if all data in this sub-dataset is NA, print NO DATA
+    ### if all data in this sub-dataset is NA, print NO DATA
     plot(x=0:1, y=0:1, type="n", xlab=name_herbicide, ylab="")
     text(x=0.5, y=0.5, lab="NO DATA")
   } else {
-    par(fig=c(0,1,0,.8), mar=c(rep(3,4)), xpd=T, new=F)
-    hist(resistance, col=rgb(0.5,0.5,0.5,alpha=0.6), freq=T, breaks=10, bord=FALSE, main="", xlim = c(0,1), xlab=name_herbicide, ylim = c(0,10))
-    
+    ### histogram
+    par(fig=c(0,1,0,.8), mar=c(rep(4,4)), xpd=T, new=F)
+    h = hist(resistance, plot = F)
+    ymax = max(h$counts)
+    hist(resistance, col=rgb(0.5,0.5,0.5,alpha=0.6), labels = TRUE, freq=T, breaks=10, bord=FALSE, main="", xlim = c(0,1), xlab=name_herbicide, ylim = c(0,ymax))
+    ### grid
     par(fig=c(0,1,0,.8), mar=c(rep(3,4)), xpd=F, new=T)
     grid()
+    ### line
     list_percentile = c()
     list_colors = rev(rainbow(nrow(subdat)))
     for (i in 1:nrow(subdat)){
       abline(v=subdat_resistance[i], col=list_colors[i], lwd=2)
       list_percentile = c(list_percentile, sum(resistance>=subdat_resistance[i])/length(resistance))
     }
-    
+    ### legend
     par(mar=c(rep(0,4)), xpd=F)
-    legend(x=0.4, y=10, title="The herbicide resistance situation of your farm in ", legend=paste0(subdat$Location[!is.na(subdat_resistance)], " is lower (better) than other ", round(list_percentile[!is.na(subdat_resistance)]*100), "% farms"), col=list_colors[!is.na(subdat_resistance)], pch=c(19,19), box.col = F, cex=.9)
+    legend("topright", title="The herbicide resistance situation of your farm in ", legend=paste0(subdat$Location[!is.na(subdat_resistance)], "(", subdat$Accession_Name[!is.na(subdat_resistance)], ") is lower (better) than other ", round(list_percentile[!is.na(subdat_resistance)]*100), "% farms"), col=list_colors[!is.na(subdat_resistance)], pch=c(19,19), box.col = F, cex=.9)
   
   }
   
-  # Map
+  ## Map
   if (sum(!is.na(subdat_resistance)) == 0 ){
     next
   }
@@ -76,11 +81,11 @@ for (name_herbicide in list_herbicides){
   yaxis = seq(round(min(predy))-2, round(max(predy))+2, 2)
   
   ### prepare the box enclosing the map
-  par(fig=c(0,0.9,0,1), mar=c(1,1,1,1), xpd=F)
-  plot(0, xlim=dx, ylim=dy, asp=1, type="n", xlab="Longitude", ylab="Latitdue", main=paste0(name_herbicide, " Resistance Gradient"), xaxt="n", yaxt="n") #empty
+  par(fig=c(0,0.9,0,1), mar=c(rep(1,4)), xpd=F, new=F)
+  plot(0, xlim=dx, ylim=dy, asp=1, type="n", xlab="Longitude", ylab="Latitdue", main=paste0(name_herbicide, " Resistance Gradient"), xaxt="n", yaxt="n", frame.plot=FALSE) #empty
   ### overlay the heatmap
-  par(fig=c(0,0.9,0,1), mar=c(1,1,1,1), xpd=F, new=TRUE)
-  image(x=predx, y=predy, z=Z, col=color_gradient[round(min(Z)*ncolors):round(max(Z)*ncolors)], xlab="", ylab="", main="", asp=1, xaxt="n", yaxt="n")
+  par(fig=c(0,0.9,0,1), mar=c(rep(3,4)), xpd=T, new=T)
+  image(x=predx, y=predy, z=Z, col=color_gradient[round(min(Z)*ncolors):round(max(Z)*ncolors)], xlab="", ylab="", main="", asp=1, xaxt="n", yaxt="n", frame.plot=FALSE)
   ### extract the bounding box of the map
   outline = maps::map("world", plot=FALSE)
   xrange = range(outline$x, na.rm=TRUE)
@@ -88,15 +93,15 @@ for (name_herbicide in list_herbicides){
   xbox = xrange + c(-2, 2)
   ybox = yrange + c(-2, 2)
   ### draw the outline of the map and color the water blue
-  par(fig=c(0,0.9,0,1), mar=c(1,1,1,1), xpd=F, new=TRUE)
+  par(fig=c(0,0.9,0,1), xpd=F, new=T)
   polypath(c(outline$x, NA, c(xbox, rev(xbox))),
          c(outline$y, NA, rep(ybox, each=2)),
          col="light blue", rule="evenodd")
   ### name the ticks with degree signs ("\U00B0")
   axis(side=1, at=xaxis, labels=paste0(xaxis, "\U00B0"))
   axis(side=2, at=yaxis, labels=paste0(yaxis, "\U00B0"),las=2)
-  ### add a grid 'cause it looks noice
-  par(fig=c(0,0.9,0,1), mar=c(1,1,1,1), xpd=F, new=TRUE)
+  ### add a grid 'cause it looks nice
+  par(fig=c(0,0.9,0,1), xpd=F, new=TRUE)
   grid(col="darkgray")
   ### plot points
   par(fig=c(0,0.9,0,1), xpd=F, new=TRUE)
@@ -107,12 +112,12 @@ for (name_herbicide in list_herbicides){
     r = eval(parse(text=paste0("subdat$", name_herbicide)))[i]
     if (!is.na(r)){
       points(x, y, col="black", bg=color_gradient[round(r*ncolors)+1], pch=19)
-      text(x, y, lab=subdat$Location[i], pos=1)
+      text(x, y, labels=subdat$Location[i], pos=1)
     }
   }
   
   ### plot heat map legend
-  par(fig=c(0.9,1,0.2,0.8), mar=c(1,1,1,1), xpd=F, new=TRUE)
+  par(fig=c(0.9,1,0.2,0.8), mar=c(rep(1.5,4)), xpd=F, new=TRUE)
   legend_x=seq(from=0,to=1, length=length(color_gradient))
   legend_y=seq(from=0, to=1, length=length(color_gradient))
   legend_z = matrix(rep(legend_x, times=length(color_gradient)), byrow=TRUE, nrow=length(color_gradient))
