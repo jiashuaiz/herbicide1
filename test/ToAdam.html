@@ -468,7 +468,7 @@ for (name_herbicide in list_herbicides){
     r = eval(parse(text=paste0(&quot;subdat$&quot;, name_herbicide)))[i]
     if (!is.na(r)){
       points(x, y, col=&quot;black&quot;, bg=color_gradient[round(r*ncolors)+1], pch=19)
-      text(x, y, labels=subdat$Location[i], pos=1)
+      text(x, y, labels=subdat$Accession_Name[i], pos=1)
     }
   }
   
