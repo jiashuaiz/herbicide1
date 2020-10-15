@@ -1,0 +1,54 @@
+---
+title: "Report html"
+date: "10/15/2020"
+---
+
+```{r, Setup all, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+library(tidyverse)
+library(png)
+library(grid)
+getwd()
+```
+
+```{r, create-path-Func}
+# create a new path
+create_path <- function(path_name){
+  # path_name = "Brent Alexander"
+  # "path_name" can be string or variable
+  
+  if (!file.exists(file.path(path_name))){
+    dir.create(file.path(path_name))
+  }
+}
+```
+
+```{r, input, include=FALSE}
+df = read.csv("../data/combined_dataframe.csv", header=TRUE, na.strings=c("#N/A", "-"))
+
+list_farmers = unique(df$Farmer_Agronomist)
+
+list_Herbicides = c("Clethodim", "Glyphosate", "Sulfometuron", "Terbuthylazine")
+
+df_commercial_name_of_herbicide <- read.csv(file = '../data/Commercial name of herbicides.csv', header=TRUE)
+
+# load title_png
+title_png_1 <- readPNG("../img/title/Clethodim.png")
+title_png_2 <- readPNG("../img/title/Glyphosate.png")
+title_png_3 <- readPNG("../img/title/Sulfometuron.png")
+title_png_4 <- readPNG("../img/title/Terbuthylazine.png")
+```
+
+```{r, mainBody, include=FALSE}
+for (farmer in list_farmers) {
+  # farmer = "Kim Lyons (c/o Andrew Speirs)"
+  
+  if (farmer=="None") {next}
+  
+  farmers_path_name = gsub("/", " ", farmer)
+  create_path("report")
+  output_path = paste0("report/", farmers_path_name,".html")
+  rmarkdown::render("Report per farmer2.Rmd", output_file = output_path)
+}
+```
+
