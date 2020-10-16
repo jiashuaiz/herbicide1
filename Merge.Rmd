@@ -1,0 +1,36 @@
+---
+title: "Merge df of resistance and sample size"
+---
+```{r, setup, include=F}
+knitr::opts_chunk$set(echo = F)
+getwd()
+```
+
+```{r, input-resistance}
+df_resistance = read.delim("../data/POP_PHENO_DATA.txt", header=TRUE, na.strings=c("#N/A", "-"))
+```
+
+```{r, input-sample-size}
+# read file
+df_sample_size = read.delim("../data/SAMPLE_SIZES.txt", header=TRUE, na.strings=c("#N/A", "-"))
+# tidy data
+df_sample_size_tidied <- pivot_wider(df_sample_size, names_from = HERBICIDE, values_from = SAMPLE_SIZE)
+
+# change column name
+## get the list of herbicide
+List_HERBICIDE = unique(df_sample_size$HERBICIDE)
+## capitalize the first letter
+List_HERBICIDE = tolower(List_HERBICIDE)
+List_Herbicide = paste0(toupper(substring(List_HERBICIDE, 1,1)), substring(List_HERBICIDE, 2))
+
+List_Herbicide_sampleSize = paste0(List_Herbicide, "_sampleSize") 
+colnames(df_sample_size_tidied) <- c("Accession_Name", List_Herbicide_sampleSize)
+```
+
+```{r, combine}
+df_combine <- merge(df_resistance, df_sample_size_tidied, by="Accession_Name", all = TRUE)
+write.csv(df_combine,"../data/combined_dataframe.csv", row.names = FALSE)
+
+```
+
+
