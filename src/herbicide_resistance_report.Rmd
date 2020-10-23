@@ -17,15 +17,20 @@ knitr::opts_chunk$set(dev="png")
 
 - Collection date: November 2018
 - Herbicides were applied at their respective recommended field rates, 30 days after germination.
-- The percentile scores indicate how many populations have resistance levels less than or equal to your populations. For example, 42nd percentile means that 42% of the populations we tested have resistance levels less than or equal to your population.
+- The percentile scores indicate how many populations have resistance levels less than or equal to your populations. (For example, 23rd percentile means that 23% of the populations we tested have resistance levels less than or equal to your population or in other words, your population is less resistant than 77% of the populations we tested.)
 
 ```{r, echo=FALSE}
 ### Herbicide name writing function
-plot_herbicide_name = function(name_herbicide, colour_herbicide, cex.title=1){
-  par(mar=c(1,0,0,0))
-  plot(x=c(-1,1), y=c(-1,1), type="n", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")
-  rect(xleft=-1, ybottom=-1, xright=1, ytop=1, col=colour_herbicide, border=NA)
-  text(x=0, y=0, lab=name_herbicide, cex=cex.title)
+plot_herbicide_name = function(name_herbicide, colour_herbicide, cex.title=1, df_herbi_specs, df_farmer, cex.sub=0.5){
+  pre_or_post = df_herbi_specs$PRE_POST[df_herbi_specs$HERBICIDE==name_herbicide]
+  hrac_group = df_herbi_specs$HRAC[df_herbi_specs$HERBICIDE==name_herbicide]
+  au_group = df_herbi_specs$AU[df_herbi_specs$HERBICIDE==name_herbicide]
+  subtitle = paste0("[", pre_or_post, "; ", "Group ", au_group, "; HRAC ", hrac_group, "]")
+  par(mar=c(0,0,0,0))
+  plot(x=c(0,5), y=c(0,5), type="n", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")
+  rect(xleft=0, ybottom=0, xright=5, ytop=5, col=colour_herbicide, border=NA)
+  text(x=2.5, y=3.5, lab=name_herbicide, cex=cex.title)
+  text(x=2.5, y=1, lab=subtitle, cex=cex.sub)
 }
 # plot_herbicide_name(name_herbicide, colour_herbicide, cex.title=1)
 ```
@@ -143,35 +148,31 @@ plot_heatmap_legend = function(color_gradient){
   legend_x=seq(from=0,to=1, length=length(color_gradient))
   legend_y=seq(from=0, to=100, length=length(color_gradient))
   legend_z = matrix(rep(legend_x, times=length(color_gradient)), byrow=TRUE, nrow=length(color_gradient))
-  par(mar=c(5,3,1,1))
+  par(mar=c(3,3,3,1))
   plot(x=c(0,100), y=c(0,100), type="n", xlab="", ylab="", xaxt="n", yaxt="n", main="")
   par(new=TRUE)
   image(x=legend_x, y=legend_y, z=legend_z, col=color_gradient, xlab="", ylab="", main="", xaxt="n", las=2)
   mtext("Resistant", side=3, line=0.5, at=0.5, cex=0.75)
-  mtext("Susceptible", side=1, line=0.5, at=0.5, cex=0.75)
+  mtext("Susceptible", side=1, line=1.5, at=0.5, cex=0.75)
 }
 # plot_heatmap_legend(color_gradient)
 ```
 
 ```{r, echo=FALSE}
-### Herbicide and assay description
+### Assay description
 plot_description = function(name_herbicide, colour_herbicide, df_herbi_specs, df_farmer, cex.text=1, width=75){
   commercial_name = df_herbi_specs$COMMERCIAL_NAME[df_herbi_specs$HERBICIDE==name_herbicide]
   application_rate = df_herbi_specs$RATE[df_herbi_specs$HERBICIDE==name_herbicide]
-  pre_or_post = df_herbi_specs$PRE_POST[df_herbi_specs$HERBICIDE==name_herbicide]
-  hrac_group = df_herbi_specs$HRAC[df_herbi_specs$HERBICIDE==name_herbicide]
-  au_group = df_herbi_specs$AU[df_herbi_specs$HERBICIDE==name_herbicide]
   par(mar=c(0,0,0,0))
   plot(x=c(-1,1), y=c(-1,1), type="n", xaxt="n", yaxt="n", xlab="", ylab="", bty="n")
   rect(xleft=-1, ybottom=-1, xright=1, ytop=1, col=colour_herbicide, border=NA)
   
-  DESCRIPTION = c(paste(strwrap(paste0(name_herbicide, " is a ", pre_or_post, " herbicide. It belongs to group ", au_group, " (equivalent to HRAC group ", hrac_group, 
-                                       "). We used ", commercial_name, " at ", application_rate, " g active ingredient per hectare."), width=width), collapse="\n"),
-                  "The sample sizes of your populations were:",
-                  paste0("- Population ", 1:nrow(df_farmer), " = ", eval(parse(text=paste0("df_farmer$", name_herbicide, "_sampleSize"))))
+  DESCRIPTION = c(paste(strwrap(paste0("We used ", commercial_name, " at ", application_rate, " g active ingredient per hectare."), width=width), collapse="\n"),
+                  "The number of plants tested per population were:",
+                  paste0("\t- Population ", 1:nrow(df_farmer), " = ", eval(parse(text=paste0("df_farmer$", name_herbicide, "_sampleSize"))))
                   )
   if (nrow(df_farmer)==1){
-    DESCRIPTION[2] = sub("The sample sizes of your populations were:", "The sample size of your population was:", DESCRIPTION[2])
+    DESCRIPTION[2] = sub("The number of plants tested per population were:", "The number of plants tested on your population was:", DESCRIPTION[2])
   }
   text(x=-1, y=-0.25, lab=paste0(DESCRIPTION, collapse="\n"), cex=cex.text, pos=4)
   
@@ -191,7 +192,7 @@ df_herbi_specs = read.csv(fname_herbi_specs)
 
 name_farmer = "BASH_REPLACE_WITH_FARMER_NAME"
 ### test
-# name_farmer = "Kim Lyons (thru Andrew Speirs)"
+name_farmer = "Kim Lyons (thru Andrew Speirs)"
 
 ### Plots layout
 r = 5 ### 5 columns for the main plots
@@ -230,7 +231,7 @@ for (i in 1:length(list_herbicides)){
     next
   }
   ### title
-  plot_herbicide_name(name_herbicide, colour_herbicide, cex.title=2)
+  plot_herbicide_name(name_herbicide, colour_herbicide, cex.title=2, df_herbi_specs, df_farmer, cex.sub=1)
   ### histogram
   vec_percentiles = plot_hist(vec_resistance, name_herbicide, colour_herbicide, df_farmer)
   ### population names
