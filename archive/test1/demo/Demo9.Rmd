@@ -1,0 +1,24 @@
+## hi
+
+```{r}
+
+dat = read.csv("C:\\Users\\ALEX\\Desktop\\test1\\Herbicide\\data\\combined_dataframe.txt", header=TRUE, na.strings=c("#N/A", "-"))
+
+farmer = "Farmer I (c/o Andrew Speirs)"
+
+list_Herbicides = c("Clethodim", "Glyphosate", "Sulfometuron", "Terbuthylazine")
+
+  df_farmer = dat[dat$Farmer_Agronomist==farmer, c(1:12, grep("Glyphosate", colnames(dat)))]
+  df_farmer2 = df_farmer[!is.na(df_farmer[, grepl("_SURVI", colnames(df_farmer))]), ]
+  df_farmer3 = df_farmer2[order(df_farmer2[, grepl("_SURVI", colnames(df_farmer2))], decreasing=FALSE), ]
+  df_farmer4 = df_farmer[order(df_farmer$Glyphosate_SURVI, decreasing=FALSE, na.last=TRUE), ] # same with 3
+  
+  y = rev(seq(from=1, to=10, length=1))[1:nrow(dat)]
+  
+plot.new()
+lines(x=c(1,1),y=c(2,2))
+```
+
+
+chunk cannot be broken
+

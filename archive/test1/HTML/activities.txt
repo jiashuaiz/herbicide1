@@ -1,0 +1,2 @@
+document.getElementById('linkid').addEventListener('mouseenter',function(){console.log('open window')})
+document.getElementById('linkid').addEventListener('mouseleave',function(){console.log('close window')})

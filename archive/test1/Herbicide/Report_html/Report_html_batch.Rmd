@@ -1,0 +1,57 @@
+---
+title: "Report html"
+date: "10/30/2020"
+---
+
+```{r, Setup all, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+library(tidyverse)
+library(png)
+library(grid)
+getwd()
+```
+
+```{r, create-path-Func}
+# create a new path
+create_path <- function(path_name){
+  # path_name = "Farmer D"
+  # "path_name" can be string or variable
+  
+  if (!file.exists(file.path(path_name))){
+    dir.create(file.path(path_name))
+  }
+}
+```
+
+```{r, input, include=FALSE}
+df = read.csv("../data/combined_dataframe.txt", header=TRUE, na.strings=c("#N/A", "-"))
+
+for (c in 1:ncol(df)) {
+  if (c>=13) {
+    df[,c] <- as.numeric(df[,c])
+  }
+}
+
+list_farmers = unique(df$Farmer_Agronomist)
+
+list_Herbicides = c("Clethodim", "Glyphosate", "Sulfometuron", "Terbuthylazine")
+
+df_commercial_name_of_herbicide <- read.csv(file = '../data/Commercial name of herbicides.csv', header=TRUE)
+
+list_colours = c("#BF7EBE", "#f0a55b", "#8BA5F2", "#FF7F7E", "#78C679")
+
+```
+
+```{r, iterate, include=FALSE}
+for (farmer in list_farmers) {
+  # farmer = "Farmer I (c/o Andrew Speirs)"
+  
+  if (farmer=="None") {next}
+  
+  farmers_path_name = gsub("/", " ", farmer)
+  create_path("report")
+  output_path = paste0("report/", farmers_path_name,".html")
+  rmarkdown::render("Report per farmer4.Rmd", output_file = output_path)
+}
+```
+

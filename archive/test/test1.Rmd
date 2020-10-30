@@ -1,0 +1,49 @@
+---
+title: "test 1"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+library(tidyverse)
+library(png)
+library(grid)
+getwd()
+```
+
+```{r, plot}
+list_farmers = c("Farmer A")
+
+List_Herbicide = c("Clethodim", "Glyphosate", "Sulfometuron", "Terbuthylazine")
+
+hist_name_vec = c("hist_Clethodim.png" , "hist_Glyphosate.png", "hist_Sulfometuron.png", "hist_Terbuthylazine.png")
+map_name_vec = c("map_Clethodim.png", "map_Glyphosate.png", "map_Sulfometuron.png", "map_Terbuthylazine.png" )
+
+for (i in 1:length(list_farmers)) {
+  # list_farmers[1] = "Farmer A"
+  # i = 1
+  for (j in 1:4) {
+    # hist_name_vec[1] = "hist_Clethodim.png"
+    # map_name_vec[1] = "map_Clethodim.png"
+    # i = 1
+    # j = 2
+    img1 <- readPNG(paste0("img/", list_farmers[i], "/", hist_name_vec[j]))
+    img2 <- readPNG(paste0("img/", list_farmers[i], "/", map_name_vec[j]))
+    
+    par(bg="aliceblue", fig=c(0,1,0.8,1), mar=(rep(0,4)), xpd=F)
+    plot.new()
+    text(x=0.5, y=0.5, labels=paste(List_Herbicide[j]), col="black", cex=1.2)
+    
+    par(new=T)
+    grid.raster(img1, x = unit(0.25, "npc"), y = unit(0.4, "npc"),  width = 0.5)
+    grid.raster(img2, x = unit(0.75, "npc"), y = unit(0.4, "npc"), width = 0.5)
+    
+    # par(bg="white", fig=c(0,1,0,1), mar=(rep(0,4)), xpd=F)
+    # rasterImage(img1, 0, 0, 0.5, 0.8)
+    # rasterImage(img2, 0.5, 0, 1, 0.8)
+    
+  }
+}
+```
+
+
+

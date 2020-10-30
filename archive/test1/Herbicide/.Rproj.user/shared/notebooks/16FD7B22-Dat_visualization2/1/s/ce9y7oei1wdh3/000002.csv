@@ -1,0 +1,6 @@
+"0","list_html_his = list()"
+"0","for (i in c(1:length(list_farmer))) {"
+"0","  list_html_his[i] <- paste0(""./"", list_farmer[i],"".html"")"
+"0","  }"
+"0","list_html_his <- setNames(list_html_his,list_farmer)"
+"0","# print(list_html_his)"

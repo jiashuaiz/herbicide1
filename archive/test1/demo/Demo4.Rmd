@@ -1,0 +1,57 @@
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+```
+
+```{r}
+x <- runif(10)
+hist(x, col=rgb(0.5,0.5,0.5,alpha=0.6), freq=T, breaks=10, bord=FALSE, main="", xlim = c(0,1), xlab="a", ylim = c(0,2))
+```
+
+```{r}
+getwd()
+file.path("book/1")
+```
+
+
+```{r}
+getwd()
+wDir = getwd()
+# change path or create a new path
+change_path <- function(path_name){ # "path_name" can be string or variable
+  if (file.exists(file.path(path_name))){
+    setwd(file.path(path_name))
+  } else {
+    dir.create(file.path(path_name))
+    setwd(file.path(path_name))
+  }
+}
+change_path("book")
+getwd()
+change_path("book/book/")
+getwd()
+setwd(wDir)
+getwd()
+```
+
+```{r}
+# x remove "/" in a list of string
+remove_slash <- function(list){
+  for (i in 1:length(list)) {
+    list[i] = gsub("/", " ", list[i])
+  }
+  return(list)
+}
+
+a = c("a/v","v/d", "a/r")
+remove_slash(a)
+```
+
+```{r}
+
+knitr::include_graphics("C:\\Users\\ALEX\\Desktop\\test1\\Herbicide\\img\\Farmer A\\hist_Clethodim.png")
+
+```
+
+```{r}
+
+```

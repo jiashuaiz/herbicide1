@@ -1,0 +1,74 @@
+---
+title: "Output PNG"
+date: "10/15/2020"
+---
+```{r, setup, include=F}
+knitr::opts_chunk$set(echo = F)
+library(maps)
+getwd()
+```
+
+```{r, input-sample-size}
+# read file
+df_sample_size = read.delim("../data/SAMPLE_SIZES.txt", header=TRUE, na.strings=c("#N/A", "-"))
+# tidy data
+df_sample_size_tidied <- pivot_wider(df_sample_size, names_from = HERBICIDE, values_from = SAMPLE_SIZE)
+
+# change column name
+## get the list of herbicide
+List_HERBICIDE = unique(df_sample_size$HERBICIDE)
+## capitalize the first letter
+List_HERBICIDE = tolower(List_HERBICIDE)
+List_Herbicide = paste0(toupper(substring(List_HERBICIDE, 1,1)), substring(List_HERBICIDE, 2))
+colnames(df_sample_size_tidied) <- c("Accession_Name", List_Herbicide)
+```
+
+```{r, image-title}
+titl_png <- function(sub_df, farmer){
+# sub_df = list_subdat[["Farmer D"]]
+# farmer = "Farmer D"
+
+# - Accession number
+# use accession number to link df_dat and df_sample_size
+access_no = df_dat$Accession_Name[which(df_dat$Farmer_Agronomist==farmer)]
+
+#- Sample size
+# store sample size data in a list with their accession no. as index
+list_sampleSize = list()
+for (i in c(1:length(access_no))) {
+  list_sampleSize[[i]] <- df_sample_size_tidied[df_sample_size_tidied$Accession_Name==access_no[i], ]
+}
+list_sampleSize <- setNames(list_sampleSize,access_no)
+# str(list_sampleSize)
+
+for (name_herbicide in List_Herbicide){
+    ## sample size
+  sampleSize = c()
+  for (acc in access_no) {
+    # acc = "ACC03"
+    name_herbicide = "Clethodim"
+    ss = list_sampleSize[[acc]][[name_herbicide]]
+    sampleSize = c(sampleSize, ss)
+    }
+  # print(sampleSize)
+}
+
+# build title
+for (name_herbicide in List_Herbicide){
+  # name_herbicide = "Clethodim"
+  
+  #- Commercial name
+  commercial_name = df_commercial_name_of_herbicide$Product.Name[which(df_commercial_name_of_herbicide$Active.Ingredient..a.i.. == name_herbicide)] # "Status Clethodim"
+  
+  par(bg="aliceblue", mar=(rep(0,4)))
+  plot.new()
+  ## Commercial name
+  text(x=0.5, y=0.95, labels=paste0(name_herbicide, " (", commercial_name, ")"), col="black", cex=1.2)
+  
+
+  
+  text(x=0.5, y=0.85, labels=paste0("Sample size: ", sampleSize, " (", access_no, ")"), col="black", cex=1)
+}
+
+}
+```

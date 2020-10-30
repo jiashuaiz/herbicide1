@@ -1,0 +1,5 @@
+"0","for (name_farmer in list_farmer) {"
+"0","  rmarkdown::render(""./Histograms.Rmd"", list_html_his[[name_farmer]])"
+"0","}"
+"2","Error in eval(parse(text = name)) : object '.' not found
+"

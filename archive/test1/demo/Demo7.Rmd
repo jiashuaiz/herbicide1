@@ -1,0 +1,31 @@
+> I body him.
+
+>> There's gonna come a point where you'll forget about what happened and you're gonna wanna come back at me.
+
+>>> Don't get hit
+
+```{css, echo=FALSE}
+.infobox {
+  padding: 1em 1em 1em 1em;
+  margin-bottom: 10px;
+  border: 2px solid orange;
+  border-radius: 10px;
+  background: #f5f5f5 5px center/3em no-repeat;
+}
+
+```
+
+
+
+::: {#hello .infobox}
+Hello **world**!
+:::
+
+```{r}
+      cat("\n\n",
+      '<p style="text-align:center;margin-left:10px;margin-right: 15px;color:#AEB6BF">',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '</p>',
+      "\n\n")
+```
+

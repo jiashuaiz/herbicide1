@@ -1,0 +1,39 @@
+---
+title: "Herbicide Resistance"
+output: html_document
+---
+
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+getwd()
+```
+
+```{r, Inputs, include=T}
+dat = read.delim("./data/POP_PHENO_DATA.txt", header=TRUE, na.string="#N/A")
+
+list_farmer = unique(dat$Farmer_Agronomist)
+
+list_subdat = list()
+for (i in c(1:length(list_farmer))) {
+  list_subdat[[i]] <- dat[dat$Farmer_Agronomist==list_farmer[i], ]
+}
+list_subdat <- setNames(list_subdat,list_farmer)
+# print(list_subdat[["Farmer D"]])
+```
+
+```{r, OutputsDir, include=T}
+#set the output directory
+list_html_dir = list()
+for (i in 1:length(list_farmer)) {
+  list_html_dir[i] <- paste0("./Report_html/", list_farmer[i],".html")
+  }
+list_html_dir <- setNames(list_html_dir,list_farmer)
+print(list_html_dir)
+```
+
+```{r, Output, include=T}
+for (name_farmer in list_farmer) {
+  subdat = list_subdat[[name_farmer]]
+  rmarkdown::render("Plots.Rmd", output_file = list_html_dir[[name_farmer]])
+}
+```

@@ -1,0 +1,36 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(maps)
+library(ggplot2)
+```
+
+### Inputs:
+```{r}
+fname_data = "C:\\Users\\ALEX\\Desktop\\test1\\Herbicide\\data\\test_data_Lrigidum_20200910.txt"
+name_farmer = "Adam"
+list_herbicides = c("Clethodim_SURVIVAL_RATE", "Glyphosate_SURVIVAL_RATE", "Sulfometuron_SURVIVAL_RATE", "Terbuthylazine_SURVIVAL_RATE")
+dat = read.delim(fname_data, header=TRUE, na.string="#N/A")
+subdat = dat[dat$Farmer_Agronomist==name_farmer, ]
+```
+
+```{r}
+par(mfrow=c(2,2))
+for (name_herbicide in list_herbicides){
+  resistance = eval(parse(text=paste0("dat$", name_herbicide)))
+  resistance = resistance[!is.na(resistance)]
+  subdat_resistance = eval(parse(text=paste0("subdat$", name_herbicide)))
+  ggplot(data = dat) +
+    geom_histogram(mapping = aes(x = dat$Clethodim_SURVIVAL_RATE))
+}
+```
+
+```{r}
+
+```
+
+```{r}
+v = c(1:10)
+print(v)
+```
+
+

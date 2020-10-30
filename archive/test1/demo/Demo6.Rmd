@@ -1,0 +1,73 @@
+---
+title: Generate content programmatically
+---
+
+With the chunk option `results = 'asis'`, you can
+write out text as raw Markdown content, which can
+also be mixed with plots.
+
+## abc {.tabset}
+
+```{r, mtcars-plots, results='asis'}
+list_Herbicides = c("Clethodim", "Glyphosate", "Sulfometuron", "Terbuthylazine")
+colorP = c("#7fc97f", "#beaed4", "#fdc086", "#ffff99")
+for (i in 1:4) {
+  cat('\n\n### ', list_Herbicides[i], '\n\n')
+  cat('\n\n:::: {style="display: flex;"} \n\n') # one \n is string only, two \n will convert to expression
+  cat('\n\n::: {} \n\n')
+  cat('\n\nHere is the **first** Div. \n\n')
+  plot(iris[, -3])
+  cat('\n\n::: \n\n')
+  cat('\n\n::: {} \n\n')
+  cat('And this block will be put on the right: \n\n')
+  plot(iris[, -5])
+  cat('\n\n::: \n\n')
+  cat('\n\n:::: \n\n')
+
+
+  
+  # cat('\n\n', sprintf("<span style='color: %s;'>%s</span>", colorP[i], list_Herbicides[i]), '\n\n')
+}
+```
+
+### haha
+
+## {-}
+
+```{r, results='asis', echo=FALSE}
+# input the following div as rmd
+  cat('\n\n:::: {style="display: flex;"} \n\n') # one \n is string only, two \n will convert to expression
+  cat('\n\n::: {} \n\n')
+  cat('\n\nHere is the **first** Div. \n\n')
+  plot(iris[, -3])
+  cat('\n\n::: \n\n')
+  cat('\n\n::: {} \n\n')
+  cat('And this block will be put on the right: \n\n')
+  plot(iris[, -5])
+  cat('\n\n::: \n\n')
+  cat('\n\n:::: \n\n')
+```
+
+
+Roses are <span style="color:red">red</span>, 
+violets are <span style="color:blue">blue</span>.
+
+:::: {style="display: flex;"}
+
+::: {}
+Here is the **first** Div.
+
+```{r}
+str(iris)
+```
+:::
+
+::: {}
+And this block will be put on the right:
+
+```{r}
+plot(iris[, -5])
+```
+:::
+
+::::

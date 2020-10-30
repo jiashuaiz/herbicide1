@@ -1,0 +1,66 @@
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+getwd()
+library(png)
+library(grid)
+# library(quanteda.textmodels)
+# library(gridExtra)
+```
+
+```{r}
+getwd()
+setwd('../Herbicide')
+getwd()
+```
+
+
+```{r}
+
+a <- readPNG("hist_Clethodim.png")
+str(a)
+b <- readPNG("C:\\Users\\ALEX\\Desktop\\test1\\Herbicide\\img\\Farmer A\\hist_Glyphosate.png")
+c <- readPNG("C:\\Users\\ALEX\\Desktop\\test1\\Herbicide\\img\\Farmer A\\hist_Sulfometuron.png")
+d <- readPNG("C:\\Users\\ALEX\\Desktop\\test1\\Herbicide\\img\\Farmer A\\hist_Terbuthylazine.png")
+
+plot.new()
+grid.raster(a, x = unit(0.5, "npc"), y = unit(0.5, "npc"))
+grid.raster(b, x = unit(0.8, "npc"), y = unit(0.8, "npc"))
+
+```
+
+```{r}
+# listaa = c("C:\\Users\\ALEX\\Desktop\\test1\\Herbicide\\img\\Farmer A\\hist_Clethodim.png", "C:\\Users\\ALEX\\Desktop\\test1\\Herbicide\\img\\Farmer A\\hist_Glyphosate.png", "C:\\Users\\ALEX\\Desktop\\test1\\Herbicide\\img\\Farmer A\\hist_Sulfometuron.png", "C:\\Users\\ALEX\\Desktop\\test1\\Herbicide\\img\\Farmer A\\hist_Terbuthylazine.png")
+# knitr::include_graphics(listaa)
+```
+
+```{r}
+test1 <- c("England and France are members of NATO and UNESCO", "bSNAKJDd")
+c = tolower(test1)
+print(c)
+
+d <- paste0(toupper(substring(c, 1,1)), substring(c, 2))
+print(d)
+
+
+```
+
+```{r}
+df_sample_size = read.delim("C:\\Users\\ALEX\\Desktop\\test1\\Herbicide\\data\\SAMPLE_SIZES.txt", header=TRUE, na.strings=c("#N/A", "-"))
+# print(df_sample_size$herbicide)
+# print(df_sample_size$HERBICIDE)
+# there is difference of capitalization in data frame
+str(df_sample_size)
+df =  df_sample_size[df_sample_size$POP==c("ACC03", "ACC04"), ] # max of 2 condition in a vector can be evaluated
+str(df)
+```
+```{r}
+df<-data.frame("hi","bye")
+names(df)<-c("hello","goodbye")
+
+de<-data.frame("hola","ciao")
+names(de)<-c("hello","goodbye")
+
+newdf <- rbind(df, de)
+str(newdf)
+```
+

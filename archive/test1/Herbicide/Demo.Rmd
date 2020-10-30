@@ -1,0 +1,103 @@
+---
+title: "Demo"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(maps)
+getwd()
+```
+
+### Inputs:
+```{r}
+fname_data = "./data/POP_PHENO_DATA.txt"
+name_farmer = "Farmer D"
+dat = read.delim(fname_data, header=TRUE, na.string="#N/A")
+subdat = dat[dat$Farmer_Agronomist==name_farmer, ]
+list_herbicides = c("Clethodim")
+```
+
+
+```{r, Maps}
+orig_par = par(no.readonly=TRUE)
+for (name_herbicide in list_herbicides){
+  ## Open a new PNG device
+  png(filename=paste0("./Image/Map_", name_herbicide, "_", ".png"))
+  
+  ## No data
+  if (sum(!is.na(subdat_resistance)) == 0 ){
+    next
+  }
+  
+  landscape_gradient = readRDS(paste0("./data/landscape_surfaces_gradient_data_", name_herbicide, ".rds"))
+  predx = landscape_gradient$predx
+  predy = landscape_gradient$predy
+  Z = landscape_gradient$Z
+  
+  ncolors = 25 ### 25 is a nice number to see dicrete contour lines across the landscape methinks...
+  color_gradient = rev(colorRampPalette(c("#A50026","#D73027","#F46D43","#FDAE61","#FEE08B","#FFFFBF","#D9EF8B","#A6D96A","#66BD63","#1A9850","#006837"))(ncolors))
+  
+  ## define x-y limits
+  dx=c(min(predx), max(predx))
+  dy=c(min(predy), max(predy))
+  xaxis = seq(round(min(predx)), round(max(predx)), 2)
+  yaxis = seq(round(min(predy))-2, round(max(predy))+2, 2)
+  
+  # ## Heatmap title
+  # par(fig=c(0,0.9,0,.9), xpd=F)
+  # plot(0, xlim=dx, ylim=dy, asp=1, type="n", main=paste0(name_herbicide, " Resistance Gradient"), xaxt="n", yaxt="n", frame.plot=FALSE)
+  
+  ## Heatmap
+  par(fig=c(0,0.9,0,1), xpd=F)
+  image(x=predx, y=predy, z=Z, col=color_gradient[round(min(Z)*ncolors):round(max(Z)*ncolors)], xlab="Longitude", ylab="Latitdue", asp=1, xaxt="n", yaxt="n", frame.plot=FALSE)
+  
+  ## extract the Outline of the map
+  outline = maps::map("world", plot=FALSE)
+  xrange = range(outline$x, na.rm=TRUE)
+  yrange = range(outline$y, na.rm=TRUE)
+  xbox = xrange + c(-2, 2)
+  ybox = yrange + c(-2, 2)
+  
+  ## draw the Outline of the map and color the water blue
+  par(fig=c(0,0.9,0,1), xpd=F)
+  polypath(c(outline$x, NA, c(xbox, rev(xbox))),
+           c(outline$y, NA, rep(ybox, each=2)),
+           col="light blue", rule="evenodd")
+  
+  ## Ticks with degree signs ("\U00B0")
+  par(fig=c(0,0.9,0,.85), xpd=F, new=TRUE)
+  axis(side=1, at=xaxis, labels=paste0(xaxis, "\U00B0"))
+  axis(side=2, at=yaxis, labels=paste0(yaxis, "\U00B0"),las=2)
+  
+  ## Grid
+  par(fig=c(0,0.9,0,.85), xpd=F, new=TRUE)
+  grid(col="darkgray")
+  
+  ## Points
+  par(fig=c(0,0.9,0,1), xpd=F, new=TRUE)
+  # plot(0, xlim=dx, ylim=dy, asp=1, type="n", xlab="", ylab="", main="", xaxt="n", yaxt="n") #empty
+  for (i in 1:nrow(subdat)){
+    x = subdat$Coordinates_E[i]
+    y = subdat$Coordinates_N[i]
+    r = eval(parse(text=paste0("subdat$", name_herbicide)))[i]
+    if (!is.na(r)){
+      points(x, y, col="black", bg=color_gradient[round(r*ncolors)+1], pch=19)
+      text(x, y, labels=subdat$Accession_Name[i], pos=1)
+    }
+  }
+  
+  ## Legend
+  par(fig=c(0.9,1,0.1,0.75), mar=c(rep(1.3,4)), xpd=F, new=TRUE)
+  legend_x=seq(from=0,to=1, length=length(color_gradient))
+  legend_y=seq(from=0, to=1, length=length(color_gradient))
+  legend_z = matrix(rep(legend_x, times=length(color_gradient)), byrow=TRUE, nrow=length(color_gradient))
+  plot(x=c(0,1), y=c(0,1), type="n", xlab="", ylab="", xaxt="n", yaxt="n", main="")
+  par(new=TRUE)
+  image(x=legend_x, y=legend_y, z=legend_z, col=color_gradient, xlab="", ylab="", main="", xaxt="n", las=2)
+  mtext("Completely\nResistant", side=3, line=0.5, at=0.5, cex=0.5)
+  mtext("Completely\nSusceptible", side=1, line=1.5, at=0.5, cex=0.5)
+  
+  dev.off()
+}
+
+```

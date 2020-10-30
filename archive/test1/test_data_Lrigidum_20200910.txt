@@ -1,0 +1,13 @@
+No.	Accession_Name	Date	Location	Coordinates_North	Coordinates_East	Crop	Herbicides	Farmer_Agronomist	Email	Phone	Notes	Clethodim_SURVIVAL_RATE	Glyphosate_SURVIVAL_RATE	Sulfometuron_SURVIVAL_RATE	Terbuthylazine_SURVIVAL_RATE
+1	ACC01	2018-11-07	Glenrowan	-36.3115443309033	146.340675669097	Road side	Unknown	Adam	#retracted#	#retracted#	-	0	0	0	#N/A
+2	ACC02	2018-11-07	Urana	-34.8644553063785	146.885923693621	Wheat	Unknown	Adam	#retracted#	#retracted#	-	0.03030303030303	0.070175438596491	#N/A	#N/A
+3	ACC03	2018-11-07	Lockhart	-34.9623225998665	146.858221400134	Wheat	Glyphosate, Gramoxone, Sakura	Brent	#retracted#	#retracted#	-	0.132075471698113	0.389830508474576	0	#N/A
+4	ACC04	2018-11-07	Lockhart	-35.0814147332719	146.730963266728	Wheat	Glyphosate	Brent	#retracted#	#retracted#	-	0	0.883720930232558	0.363636363636364	0.451612903225806
+5	ACC05	2018-11-07	Lockhart	-34.7476228574136	147.407998142586	Wheat	Glyphosate	Brent	#retracted#	#retracted#	-	0	0.013888888888889	#N/A	#N/A
+31	ACC31	2018-11-11	Kaniva	-36.0244973017609	141.543080698239	Wheat	Unknown	Matt	#retracted#	#retracted#	-	0.048780487804878	0.264516129032258	0.121951219512195	0.189189189189189
+32	ACC32	2018-11-11	Dimboola	-36.0574026910745	142.332248308925	Lake side	Unknown	Matt	#retracted#	#retracted#	High salinity	0	0	0	#N/A
+33	ACC33	2018-11-12	Dimboola	-35.7331310382031	142.776274961797	Canola	Triazine, Clethodim	Chris	#retracted#	#retracted#	>3 yrs no glyphosate	0.5	0.0625	0.125	0.333333333333333
+34	ACC34	2018-11-12	Dimboola	-35.5674614134525	142.953857586547	Canola	Triazine, Clethodim	Chris	#retracted#	#retracted#	>3 yrs no glyphosate	0.613636363636364	0	#N/A	#N/A
+35	ACC35	2018-11-12	Pimpinio	-35.9260923581682	142.727037641832	Lentil	Unknown	Chris	#retracted#	#retracted#	-	0	0.2	0.256410256410256	0.095238095238095
+61	ACC61	2018-12-20	Lake Bolac	-36.7065269305479	143.735873069452	-	Unknown	Jack	#retracted#	#retracted#	Farmer: Andrew	0	0.2	0.35	0.351851851851852
+62	ACC62	2018-12-20	Lake Bolac	0.710336110786644	0.710336110786644	-	Unknown	Jack	#retracted#	#retracted#	Mc. Innes	0	0.790476190476191	0.205882352941176	0.423728813559322

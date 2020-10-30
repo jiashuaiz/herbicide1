@@ -1,0 +1,8 @@
+# your pages
+```{r 2}
+print(a[i])
+print(j)
+print('onetime')
+```
+
+
