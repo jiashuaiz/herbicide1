@@ -1,0 +1,268 @@
+---
+author: JIASHUAI ZHU
+output: html_document
+---
+
+```{r, setup, include=F}
+knitr::opts_chunk$set(echo = F)
+# -------------------------------------------------------
+# # test-used, close this area when running iteration,
+# library(tidyverse)
+# library(png)
+# library(grid)
+# 
+# getwd()
+# ------------close when running iteration----------------
+```
+
+```{r, test-only, include=F}
+# -------------------------------------------------------
+# df = read.csv("../data/combined_dataframe.txt", header=TRUE, na.strings=c("#N/A", "-"))
+# 
+# for (c in 1:ncol(df)) {
+#   if (c>=13) {
+#     df[,c] <- as.numeric(df[,c])
+#   }
+# }
+# 
+# list_farmers = unique(df$Farmer_Agronomist)
+# 
+# list_Herbicides = c("Clethodim", "Glyphosate", "Sulfometuron", "Terbuthylazine")
+# 
+# df_commercial_name_of_herbicide <- read.csv(file = '../data/Commercial name of herbicides.csv', header=TRUE)
+# 
+# list_colours = c("#BF7EBE", "#f0a55b", "#8BA5F2", "#FF7F7E", "#78C679")
+# -----------close when running iteration--------------------
+```
+
+
+```{css, echo=FALSE}
+h2 {
+  text-align: left;
+  font-size: 18pt;
+  color:#303030;
+}
+
+h3 {
+  text-align: center;
+  font-size: 24pt;
+  color:#21618C;
+}
+
+.outterdiv{
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.imag{
+  display: block;
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.textbox {
+  width: 910px;
+  height: auto;
+  border-radius: 8px;
+  padding: 1.2em 1.5em 1.2em 1.5em;
+  box-sizing: border-box;
+  position: relative;
+  top: 0px;
+  left: 0px;
+  background: #F8F8F8;
+}
+
+#box1-Clethodim{
+ background: #f5e4f7;
+}
+
+#box1-Glyphosate{
+ background: #fff7f0;
+}
+
+#box1-Sulfometuron{
+ background: #edf2ff;
+}
+
+#box1-Terbuthylazine{
+ background: #ffe6e6;
+}
+
+#box2{
+  overflow: auto;
+  height: 150px;
+}
+
+ul.results {
+  margin: 0;
+  padding: 0em 1em .4em 0.1em;
+}
+```
+
+```{r}
+# sub data frame of each farmer
+## ------close when running iteration------
+# farmer = "Ben Cassidy"
+## ----------------------------------------
+sub_df = df[df$Farmer_Agronomist == farmer, ]
+```
+
+<!-- Outer -->
+## Dear __`r farmer`__ {.tabset}
+
+<hr>
+ 
+This report contains information about herbicide resistance of <span style="color:#BF7EBE; font-weight:bold">Clethodim</span>, <span style="color:#FFBF7F; font-weight:bold">Glyphosate</span>, <span style="color:#8BA5F2; font-weight:bold">Sulfometuron</span>, and <span style="color:#FF7F7E; font-weight:bold">Terbuthylazine</span> of your farms.
+
+* The <b>histograms</b> demonstrate the relative situation of your farms compared to your neighbours. The percentile scores indicate how many farms have resistance levels less than or equal to the resistance level of your farms. (For example, 23rd percentile means that 23% of farms we tested have resistance levels less than or equal to the resistance level of your farms; or in other words, your farm is less resistant (better) than 77% of farms we tested.)
+
+* The <b>gradient maps</b> give you a bigger view of the resistance gradient of four herbicides across South-East Australia, and where you farms locate.
+
+ Collection date: November 2018
+
+
+```{r, mainBody, results='asis'}
+
+note = c("•   Clethodim is an acetyl-CoA carboxylase (ACCase) inhibitor, which disrupts fatty acid biosynthesis. [Post-emergent] \n\n •   Clethodim was applied at a recommended field rate of 120 g active ingredient per hectare, 30 days after germination.",
+     "•   Glyphosate is a 5-enolpyruvylshikimate-3-phosphate synthase (EPSPS) inhibitor, which disrupts the synthesis of aromatic amino acids - tyrosine, tryptophan and phenylalanine [Post-emergent] \n\n •   Glyphosate was applied at a recommended field rate of 720 g active ingredient per hectare, 30 days after germination.",
+     "•   Sulfometuron is an acetolactate synthase (ALS) or acetohydroxy acid synthase (AHAS) inhibitor, which disrupts the synthesis of branched amino acids - valine, leucine and isoleucine. [Pre- and post-emergent] \n\n •   Sulfometuron was applied at a recommended field rate of 400 g active ingredient per hectare, 30 days after germination.",
+     "•   Terbuthylazine is a photosystem II (PSII) inhibitor. [Post-emergent] \n\n •   Sulfometuron was applied at a recommended field rate of 1,050 g active ingredient per hectare, 30 days after germination.")
+  
+for (i in 1:length(list_Herbicides)) {
+  # i=1
+  
+  # tabName
+  cat('\n\n### ', list_Herbicides[i], '\n\n')
+  
+  # textbox 1
+  colour = list_colours[i]
+  cat(paste0('\n\n:::: {#box1-', list_Herbicides[i] ,' .textbox} \n\n'))
+  
+  ## Commercial name
+  commercial_name = df_commercial_name_of_herbicide$Product.Name[which(df_commercial_name_of_herbicide$Active.Ingredient..a.i.. == list_Herbicides[i])] ## "Status Clethodim"
+
+  cat('\n\n',
+      '<p style="text-align:center; font-size:16px">', 
+        '<span style=" color:', colour,';font-weight:bold;font-size: 120%">', commercial_name,
+        '</span>',
+      ' (Product Name)', 
+      '</p>',
+      '\n\n')
+  
+  ## Explanation
+  cat("\n\n",
+      '<p style="text-align:justify;margin-left:1em;margin-right: 1em">',
+      note[i],
+      '</p>',
+      "\n\n")
+  
+  cat('\n\n:::: \n\n')
+  
+  # whether draw plots and textbox 2
+  ## sub data frame without NA rows, in terms of a specific herbicide
+  sub_df_herb = sub_df[order(eval(parse(text=paste0("sub_df$", list_Herbicides[i],"_SURVI"))), decreasing=F, na.last=NA),]
+  
+  ## sub_df_herb may contain no data
+  if (nrow(sub_df_herb) != 0) {
+    
+    # plots
+    ## load image img1 is hist; img2 is map
+    farmers_path_name = gsub("/", " ", farmer)
+    
+    ## div outer
+    cat('\n\n:::: {.outterdiv style="display: flex;"} \n\n')
+    
+    ### div inner 1,
+    cat('\n\n::: {.imag} \n\n')
+    
+    ### histogram
+    cat('\n\n', '![](', paste0("../img/", farmers_path_name, "/", "hist_",  list_Herbicides[i], ".png"), ')', '\n\n')
+    
+    cat('\n\n::: \n\n')
+    
+    ### div inner 2
+    cat('\n\n::: {.imag} \n\n')
+    
+    ### map
+    cat('\n\n', '![](', paste0("../img/", farmers_path_name, "/", "map_",  list_Herbicides[i], ".png"), ')', '\n\n')
+    
+    cat('\n\n::: \n\n')
+    cat('\n\n:::: \n\n')
+    
+    # textbox 2
+    cat('\n\n:::: {#box2 .textbox} \n\n')
+    
+    ## all resistance data of each herbicide
+    resistance = eval(parse(text=paste0("df$", list_Herbicides[i], "_SURVI")))
+    resistance = resistance[!is.na(resistance)] ## remove NA
+  
+    ## sub data (of each farmer, of each name_herbicide)
+    L_subdat_resistance = eval(parse(text=paste0("sub_df_herb$", list_Herbicides[i], "_SURVI"))) # "L_subdat_resistance" is a numeric vector
+    
+    ## sample size (of each farmer, of each name_herbicide)
+    L_sampl_size = eval(parse(text = paste0("sub_df_herb$", list_Herbicides[i], "_sampleSize"))) # "L_sampl_size" is a numeric vector
+    
+    cat("\n\n",
+          list_Herbicides[i], " resistance of your farm in ", "\n\n")
+  
+    
+    for (j in 1:nrow(sub_df_herb)) {
+      # j=1
+      
+      acc_no = sub_df_herb$Accession_Name[j]
+      V_place = sub_df_herb$Location[j]
+      V_sampl_size = L_sampl_size[j]
+      
+      V_percentile = round ((sum(resistance<=L_subdat_resistance[j])/length(resistance))*100)
+      if ((V_percentile %% 10)==1 & (V_percentile>20 | V_percentile<10)){
+        t_percentile = paste0(V_percentile, "st")
+      } else if ((V_percentile %% 10)==2 & (V_percentile>20 | V_percentile<10)){
+        t_percentile = paste0(V_percentile, "nd")
+      } else if ((V_percentile %% 10)==3 & (V_percentile>20 | V_percentile<10)){
+        t_percentile = paste0(V_percentile, "rd")
+      } else {
+        t_percentile = paste0(V_percentile, "th")
+      }
+      
+      if (!is.na(V_percentile)) {
+        cat(paste0("\n\n", '<ol class="results">',
+            '<span style=" color:', colour, ';font-size: 100%">',
+                j, '.', ' ', '</span>',
+            V_place,
+            ' is in a ',
+            '<code>', t_percentile, ' percentile','</code>',
+            ' situation',
+            # '<code>', acc_no, '</code>',
+            ';', ' Sample size: ',
+            '<code>', V_sampl_size, '</code>',
+          '</ol>', "\n\n"))
+      }
+      
+    }
+    
+    # end of textbox2
+    cat('\n\n:::: \n\n')
+    
+  } else {
+    cat('\n\n:::: {.textbox} \n\n')
+    cat("\n\n", '<p style="text-align:center; font-size: 18px">',
+          "\nSorry, no data available here", 
+        '</p>', "\n\n")
+    cat('\n\n:::: \n\n')
+  }
+  
+}
+
+```
+
+## {-} 
+
+<hr>
+
+<span style=" color:gray ;font-size: 9px">
+Created by JIASHUAI ZHU, JEFFERSON F. PARIL, The Adaptive Evolution Lab</span>
+

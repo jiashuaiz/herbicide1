@@ -17,13 +17,8 @@ list_farmer = unique(df_dat$Farmer_Agronomist)
 # List of herbicides
 List_Herbicide = c("Clethodim", "Glyphosate", "Sulfometuron", "Terbuthylazine")
 
-# Extract sub data frames
-list_subdat = list() # store the sub data of all farmers into a list
-for (i in c(1:length(list_farmer))) {
-  list_subdat[[i]] <- df_dat[df_dat$Farmer_Agronomist==list_farmer[i], ]
-}
-list_subdat <- setNames(list_subdat,list_farmer) # the name used to set header must be the same with that used to build sub-data
-# print(list_subdat)
+# Color
+list_colours = c("#BF7EBE", "#f0a55b", "#8BA5F2", "#FF7F7E", "#78C679")
 ```
 
 
@@ -47,35 +42,46 @@ create_path <- function(path_name){
 
 ```{r, HistogramsFunc}
 hist_png <- function(sub_df, farmer){
-# sub_df = list_subdat[["Brent Alexander"]]
-# farmer = "Brent Alexander"
+# sub_df = subdat
+# farmer = "Ben Cassidy"
+
+for (i in 1:length(List_Herbicide)){
+  # i = 4
   
-for (name_herbicide in List_Herbicide){
-  ## name_herbicide = "Clethodim"
+  ## color
+  colour_herbicide = list_colours[i]
   
-  ## Load data of each name_herbicide
-  resistance = eval(parse(text=paste0("df_dat$", name_herbicide)))
+  ## Load data of each herbicide
+  resistance = eval(parse(text=paste0("df_dat$", List_Herbicide[i])))
   resistance = resistance[!is.na(resistance)] ## remove NA
   
-  ## Load sub data (of each farmer, of each name_herbicide)
-  subdat_resistance = eval(parse(text=paste0("sub_df$", name_herbicide))) # "subdat_resistance" is a numeric vector, and changes with different farmers, different herbicides
+  ## Load sub data (of each farmer, of each herbicide)
+  subdat_resistance = eval(parse(text=paste0("sub_df$", List_Herbicide[i]))) # "subdat_resistance" is a numeric vector, and changes with different farmers, different herbicides
+  ## order subdat_resistance increasingly
+  subdat_resistance = subdat_resistance[order(subdat_resistance,decreasing=F,na.last=NA)]
   
   ## Open a new PNG device
   farmer = gsub("/", " ", farmer)
   create_path(paste0("../img/", farmer))
-  png(filename= paste0("../img/", farmer,"/hist_", name_herbicide, ".png"))
+  png(filename= paste0("../img/", farmer,"/hist_", List_Herbicide[i], ".png"))
   
-  if (sum(!is.na(subdat_resistance))==0){
+  if (length(subdat_resistance)==0){
     ### if all data in this sub-dataset is NA, print "NO DATA"
     par(xpd=T)
-    plot(x=0:1, y=0:1, type="n", xlab=name_herbicide, ylab="")
+    plot(x=0:1, y=0:1, type="n", xlab=List_Herbicide[i], ylab="")
     text(x=0.5, y=0.5, lab="NO DATA")
   } else {
     ### histogram
     par(xpd=T)
+    
     h = hist(resistance, plot = F) # Obtain data in Histogram
-    ymax = max(h$counts)
-    hist(resistance, col=rgb(0.5,0.5,0.5,alpha=0.6), labels = TRUE, freq=T, breaks=10, bord=FALSE, main="", xlim = c(0,1), xlab=name_herbicide, ylim = c(0,ymax), ylab="Counts")
+    ymax = max(h$counts) + 2
+
+    hist(resistance*100, col=rgb(0.5,0.5,0.5,alpha=0.6), 
+         labels=F, freq=T, breaks=10, bord=FALSE,
+         main=paste0("\n\n\n Histogram of ", List_Herbicide[i],"  resistance"), col.main=colour_herbicide, 
+         xlim = c(-2,102), xlab=paste0(List_Herbicide[i], " Resistance (%)"), 
+         ylim = c(0,ymax), ylab="Number of Farms")
     
     ### grid
     par(xpd=F)
@@ -83,156 +89,181 @@ for (name_herbicide in List_Herbicide){
     
     ### line
     par(xpd=F)
-    list_percentile = c()
-    list_colors = rev(rainbow(nrow(sub_df)))
-    for (i in 1:nrow(sub_df)){
-      abline(v=subdat_resistance[i], col=list_colors[i], lwd=2)
-      list_percentile = c(list_percentile, sum(resistance>=subdat_resistance[i])/length(resistance))
+    x = subdat_resistance * 100
+    y = rev(seq(from=1, to=max(h$counts)-1, length=10))[1:length(subdat_resistance)] 
+
+    for (j in 1:length(subdat_resistance)){
+      lines(x=c(x[j], x[j]), y=c(0, y[j]), lwd=2, col=colour_herbicide)
+      points(x=x[j], y=y[j], bg=colour_herbicide, pch=25)
+
+      V_percentile = round ((sum(resistance<=subdat_resistance[j])/length(resistance))*100)
+      
+      if ((V_percentile %% 10)==1 & (V_percentile>20 | V_percentile<10)){
+      t_percentile = paste0(V_percentile, "st")
+    } else if ((V_percentile %% 10)==2 & (V_percentile>20 | V_percentile<10)){
+      t_percentile = paste0(V_percentile, "nd")
+    } else if ((V_percentile %% 10)==3 & (V_percentile>20 | V_percentile<10)){
+      t_percentile = paste0(V_percentile, "rd")
+    } else {
+      t_percentile = paste0(V_percentile, "th")
+    }
+      
+      text(x=x[j], y=y[j], lab=paste0(j, ": ", t_percentile), pos=3)
+      
+      # ### legends
+      # par(xpd=F)
+      # legend("topright", legend=j, col=list_colors[!is.na(subdat_resistance)], pch=c(19,19), box.col = F, cex=1.1)
     }
     
-    ### legends
-    par(xpd=F)
-    legend("topright", title="The herbicide resistance situation of your farm in ", legend=paste0(sub_df$Location[!is.na(subdat_resistance)], "(", sub_df$Accession_Name[!is.na(subdat_resistance)], ") is lower (better) than other ", round(list_percentile[!is.na(subdat_resistance)]*100), "% farms"), col=list_colors[!is.na(subdat_resistance)], pch=c(19,19), box.col = F, cex=.9)
   }
   dev.off()
 }
 }
+# test
+# name_farmer = "Ben Cassidy"
+# subdat = df_dat[df_dat$Farmer_Agronomist==name_farmer, ]
+# hist_png(subdat, name_farmer)
 ```
 
 ```{r, MapsFunc}
 map_png <- function(sub_df, farmer){
-# sub_df = list_subdat[["Brent Alexander"]]
-# farmer = "Brent Alexander"
-  
-for (name_herbicide in List_Herbicide){
-  ## name_herbicide = "Clethodim"
-  
-  ## Load sub data (of each farmer, of each name_herbicide)
-  subdat_resistance = eval(parse(text=paste0("sub_df$", name_herbicide))) # "subdat_resistance" is a numeric vector, and changes with different farmers, different herbicides
+# sub_df = subdat
+# farmer = "Jack Connor"
+
+for (i in 1:length(List_Herbicide)){
+  # i = 1
   
   ## Load landscape_gradient of each herbicide
-  landscape_gradient = readRDS(paste0("../data/landscape_surfaces_gradient_data_", name_herbicide, ".rds"))
+  landscape_gradient = readRDS(paste0("../data/landscape_surfaces_gradient_data_", List_Herbicide[i], ".rds"))
   predx = landscape_gradient$predx
   predy = landscape_gradient$predy
   Z = landscape_gradient$Z
   
-  ### define x-y limits
+  ## define x-y limits
   dx=c(min(predx), max(predx))
   dy=c(min(predy), max(predy))
   xaxis = seq(round(min(predx)), round(max(predx)), 2)
   yaxis = seq(round(min(predy))-2, round(max(predy))+2, 2)
   
+  ## set color palette
+  ncolors = 25 ### 25 is a nice number to see dicrete contour lines across the landscape methinks...
+  color_gradient = rev(colorRampPalette(c("#A50026","#D73027","#F46D43","#FDAE61","#FEE08B","#FFFFBF","#D9EF8B","#A6D96A","#66BD63","#1A9850","#006837"))(ncolors))
+  ## color of each herbicide
+  colour_herbicide = list_colours[i]
+  
   ## Open a new PNG device
   farmer = gsub("/", " ", farmer)
   create_path(paste0("../img/", farmer))
-  png(filename=paste0("../img/", farmer,"/map_", name_herbicide, ".png"))
-  
-  if (sum(!is.na(subdat_resistance)) == 0 ){
-    ### if all data in the sub-data set is NA, print "NO DATA"
-    par(xpd=F)
-    plot(0, xlim=dx, ylim=dy, asp=1, type="n", bty = 'n', xlab="", ylab="", main="", xaxt="n", yaxt="n") #empty
-    text(x=0.5, y=0.5, lab="NO DATA")
+  png(filename=paste0("../img/", farmer,"/map_", List_Herbicide[i], ".png"), width = 480, height = 480, units = "px", pointsize = 12)
     
-    ### Ticks with degree signs ("\U00B0")
-    par(xpd=F)
-    axis(side=1, at=xaxis, labels=paste0(xaxis, "\U00B0"))
-    axis(side=2, at=yaxis, labels=paste0(yaxis, "\U00B0"),las=2)
-  } else{
+  ## Heatmap
+  ### Heatmap main
+  par(fig=c(0,0.9,0,1), mar=c(5,5,0,2), xpd=F)
+  image(x=predx, y=predy, z=Z, col=color_gradient[round(min(Z)*ncolors):round(max(Z)*ncolors)], xlab="Longitude", ylab="Latitdue", asp=1, xaxt="n", yaxt="n", frame.plot=FALSE)
+    
+  ### Heatmap title
+  par(fig=c(0,0.9,0,.9), mar=c(5,5,1,2), xpd=F, new=TRUE)
+  plot(0, xlim=dx, ylim=dy, asp=1, type="n", bty = 'n', xlab="", ylab="", main=paste0(List_Herbicide[i], " Resistance Gradient"), col.main=colour_herbicide, cex.main=1.2, xaxt="n", yaxt="n", frame.plot=F)
+    
+  ### extract the Outline of the map
+  outline = maps::map("world", plot=FALSE)
+  xrange = range(outline$x, na.rm=TRUE)
+  yrange = range(outline$y, na.rm=TRUE)
+  xbox = xrange + c(-2, 2)
+  ybox = yrange + c(-2, 2)
+    
+  ### draw the Outline of the map and color the water blue
+  par(fig=c(0,0.9,0,1), mar=c(5,5,0,2), xpd=F)
+  polypath(c(outline$x, NA, c(xbox, rev(xbox))),
+           c(outline$y, NA, rep(ybox, each=2)),
+           col="light blue", rule="evenodd")
+  
+  ### Ticks with degree signs ("\U00B0")
+  par(fig=c(0,0.9,0,.85), mar=c(5,5,0,2), xpd=F, new=TRUE)
+  axis(side=1, at=xaxis, labels=paste0(xaxis, "\U00B0"))
+  axis(side=2, at=yaxis, labels=paste0(yaxis, "\U00B0"),las=2)
+    
+  ### Grid
+  par(fig=c(0,0.9,0,.85), mar=c(5,5,2,2), xpd=F, new=TRUE)
+  grid(col="darkgray")
+    
+  ### Points
+  #### order and remove NA, to get order of resistance based on each herbicide
+  sub_df_herb = sub_df[order(eval(parse(text=paste0("sub_df$", List_Herbicide[i],"_SURVI"))), decreasing=F, na.last=NA),]
+    
+  #### create an empty plot to draw points
+  par(fig=c(0,0.9,0,1), mar=c(5,5,0,2), xpd=F, new=TRUE)
+  plot(0, xlim=dx, ylim=dy, asp=1, type="n", bty = 'n', xlab="", ylab="", main="", xaxt="n", yaxt="n", frame.plot=F)
 
-  
-    ### set color palette
-    ncolors = 25 ### 25 is a nice number to see dicrete contour lines across the landscape methinks...
-    color_gradient = rev(colorRampPalette(c("#A50026","#D73027","#F46D43","#FDAE61","#FEE08B","#FFFFBF","#D9EF8B","#A6D96A","#66BD63","#1A9850","#006837"))(ncolors))
-    
-    # ### Heatmap title
-    # par(fig=c(0,0.9,0,.9), xpd=F)
-    # plot(0, xlim=dx, ylim=dy, asp=1, type="n", main=paste0(name_herbicide, " Resistance Gradient"), xaxt="n", yaxt="n", frame.plot=FALSE)
-    
-    ### Heatmap
-    par(fig=c(0,0.9,0,1), xpd=F)
-    image(x=predx, y=predy, z=Z, col=color_gradient[round(min(Z)*ncolors):round(max(Z)*ncolors)], xlab="Longitude", ylab="Latitdue", asp=1, xaxt="n", yaxt="n", frame.plot=FALSE)
-    
-    ### extract the Outline of the map
-    outline = maps::map("world", plot=FALSE)
-    xrange = range(outline$x, na.rm=TRUE)
-    yrange = range(outline$y, na.rm=TRUE)
-    xbox = xrange + c(-2, 2)
-    ybox = yrange + c(-2, 2)
-    
-    ### draw the Outline of the map and color the water blue
-    par(fig=c(0,0.9,0,1), xpd=F)
-    polypath(c(outline$x, NA, c(xbox, rev(xbox))),
-             c(outline$y, NA, rep(ybox, each=2)),
-             col="light blue", rule="evenodd")
-    
-    ### Ticks with degree signs ("\U00B0")
-    par(fig=c(0,0.9,0,.85), xpd=F, new=TRUE)
-    axis(side=1, at=xaxis, labels=paste0(xaxis, "\U00B0"))
-    axis(side=2, at=yaxis, labels=paste0(yaxis, "\U00B0"),las=2)
-    
-    ### Grid
-    par(fig=c(0,0.9,0,.85), xpd=F, new=TRUE)
-    grid(col="darkgray")
-    
-    ### Points
-    par(fig=c(0,0.9,0,1), xpd=F, new=TRUE)
-    plot(0, xlim=dx, ylim=dy, asp=1, type="n", bty = 'n', xlab="", ylab="", main="", xaxt="n", yaxt="n") #empty
-    for (i in 1:nrow(sub_df)){
-      x = sub_df$Coordinates_E[i]
-      y = sub_df$Coordinates_N[i]
-      r = eval(parse(text=paste0("sub_df$", name_herbicide)))[i]
-      if (!is.na(r)){
-        points(x, y, col="black", bg=color_gradient[round(r*ncolors)+1], pch=19)
-        text(x, y, labels=sub_df$Accession_Name[i], pos=1, cex=0.8)
+  if (nrow(sub_df_herb) != 0){ # some herbicides do not contain data
+    L_Coordinates_E = sub_df_herb$Coordinates_E
+    L_Coordinates_E = L_Coordinates_E[!is.na(L_Coordinates_E)] # some coordinate data is missing
+    median_Coordinates_E = median(L_Coordinates_E) # use the median of available data to replace NA
+    for (j in 1:nrow(sub_df_herb)){
+      # j=2
+      x = sub_df_herb$Coordinates_E[j]
+      if (is.na(x)) {
+        x = median_Coordinates_E
+      } # use the median of available data to replace NA
+      
+      y = sub_df_herb$Coordinates_N[j]
+      if (is.na(y)) {
+        y = median_Coordinates_E
       }
+      
+      r = eval(parse(text=paste0("sub_df_herb$", List_Herbicide[i])))[j]
+      
+      points(x, y, col="black", bg=color_gradient[round(r*ncolors)+1], pch=19)
+      
+      ### draw arrows and number labels
+      if (median_Coordinates_E<144){
+        x1 = x-(j*0.75)
+        y1 = y-(median(1:nrow(sub_df_herb))-(j*0.75))
+      } else {
+        x1 = x-(j*0.75)
+        y1 = y-(median(1:nrow(sub_df_herb))-(j*0.75))
+      }
+      
+      arrows(x0=x, y0=y, x1=x1, y1=y1, length=0.15, col="black")
+      text(x1, y1, lab=j, pos=3)
     }
-    
-    ### Legend
-    par(fig=c(0.9,1,0.1,0.75), mar=c(rep(1.3,4)), xpd=F, new=TRUE)
-    legend_x=seq(from=0, to=1, length=length(color_gradient))
-    legend_y=seq(from=0, to=1, length=length(color_gradient))
-    legend_z = matrix(rep(legend_x, times=length(color_gradient)), byrow=TRUE, nrow=length(color_gradient))
-    plot(x=c(0,1), y=c(0,1), type="n", xlab="", ylab="", xaxt="n", yaxt="n", main="")
-    par(new=TRUE)
-    image(x=legend_x, y=legend_y, z=legend_z, col=color_gradient, xlab="", ylab="", main="", xaxt="n", las=2)
-    mtext("Completely\nResistant", side=3, line=0.5, at=0.5, cex=0.5)
-    mtext("Completely\nSusceptible", side=1, line=1.5, at=0.5, cex=0.5)
   }
+  
+    
+  ## Legend
+  legend_x=seq(from=0, to=1, length=length(color_gradient))
+  legend_y=seq(from=0, to=100, length=length(color_gradient))
+  legend_z = matrix(rep(legend_x, times=length(color_gradient)), byrow=TRUE, nrow=length(color_gradient))
+  
+  par(fig=c(0.88,0.93,0.148,0.775), mar=c(rep(0,4)), xpd=F, new=TRUE)
+  image(x=legend_x, y=legend_y, z=legend_z, col=color_gradient, xlab="", ylab="", main="", axes=FALSE)
+  
+  par(fig=c(0.88,0.93,0.148,0.775), mar=c(rep(0,4)), xpd=F, new=TRUE)
+  axis(4, at=seq(from = 0, to = 100, by = 20), lty=1, las=2, cex.axis=0.8)
+  mtext("Completely\nResistant", side=3, line=0.5, at=0.5, cex=0.9)
+  mtext("Completely\nSusceptible", side=1, line=1.5, at=0.5, cex=0.9)
+
 
   dev.off()
 }
 }
+# test
+# name_farmer = "Jack Connor"
+# subdat = df_dat[df_dat$Farmer_Agronomist==name_farmer, ]
+# map_png(subdat, name_farmer)
 ```
 
 ```{r, output, include=F}
 # Run this chunk to get png results
 
 for (name_farmer in list_farmer){
-  # name_farmer = "Brent Alexander"
+  # name_farmer = "Kim Lyons (c/o Andrew Speirs)"
   
   ## If "name_farmer" == "None", do next iteration
   if (name_farmer == "None" ){next}
-  subdat = list_subdat[[name_farmer]] 
+  subdat = df_dat[df_dat$Farmer_Agronomist==name_farmer, ]
   hist_png(subdat, name_farmer)
-  map_png(subdat, name_farmer) # the input "subdat" should be a data frame; name_farmer should be a string
+  map_png(subdat, name_farmer)
+  ### the input "subdat" should be a data frame; name_farmer should be a string
 }
-```
-
-```{r, title-image, include=F}
-for (name_herbicide in List_Herbicide){
-  # name_herbicide = "Clethodim"
-  
-  commercial_name = df_commercial_name_of_herbicide$Product.Name[which(df_commercial_name_of_herbicide$Active.Ingredient..a.i.. == name_herbicide)] # "Status Clethodim"
-  
-  # Open a new PNG device
-  create_path("../img/title/")
-  png(filename=paste0("../img/title/", name_herbicide, ".png"), width = 500, height = 50, units = "px")
-  
-  par(bg="aliceblue", mar=(rep(0,4)))
-  plot.new()
-  text(x=0.5, y=0.5, labels=paste0(name_herbicide, " (", commercial_name, ")"), col="black", cex=1.2)
-  
-  dev.off()
-}
-
 ```
