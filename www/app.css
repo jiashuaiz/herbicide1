@@ -1,0 +1,180 @@
+/* ── Global ─────────────────────────────────────────────────────────────────── */
+body {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f0f2f5;
+  color: #333;
+}
+
+.navbar-default {
+  background: linear-gradient(135deg, #1a6b3c 0%, #21618C 100%);
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.navbar-default .navbar-brand,
+.navbar-default .navbar-nav > li > a {
+  color: #fff !important;
+  font-weight: 500;
+}
+.navbar-default .navbar-nav > .active > a {
+  background: rgba(255,255,255,0.15) !important;
+  border-radius: 4px;
+}
+
+/* ── Instructions tab ──────────────────────────────────────────────────────── */
+.instructions-hero {
+  background: linear-gradient(135deg, #e8f5e9 0%, #e3f2fd 100%);
+  border-radius: 12px;
+  padding: 2.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+.instructions-hero h2 {
+  color: #1a6b3c;
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+.instructions-hero p {
+  color: #555;
+  font-size: 1.1rem;
+}
+
+.step-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  border-left: 4px solid #1a6b3c;
+}
+.step-card h4 {
+  color: #1a6b3c;
+  margin-top: 0;
+}
+
+.file-spec {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.file-spec h4 {
+  color: #21618C;
+  margin-top: 0;
+}
+.file-spec table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+.file-spec th {
+  background: #f5f7fa;
+  padding: 6px 10px;
+  text-align: left;
+  border-bottom: 2px solid #ddd;
+}
+.file-spec td {
+  padding: 5px 10px;
+  border-bottom: 1px solid #eee;
+}
+.file-spec code {
+  background: #f0f0f0;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.85rem;
+}
+
+/* ── Upload tab ────────────────────────────────────────────────────────────── */
+.upload-panel {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.btn-run {
+  background: linear-gradient(135deg, #1a6b3c 0%, #28a745 100%);
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  font-size: 1.05rem;
+  border-radius: 8px;
+  width: 100%;
+  margin-top: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn-run:hover {
+  opacity: 0.9;
+  color: #fff;
+}
+
+.btn-sample {
+  background: #f0f2f5;
+  color: #555;
+  border: 2px dashed #bbb;
+  padding: 10px 20px;
+  border-radius: 8px;
+  width: 100%;
+  margin-top: 8px;
+  cursor: pointer;
+}
+.btn-sample:hover {
+  background: #e8f5e9;
+  border-color: #1a6b3c;
+  color: #1a6b3c;
+}
+
+.status-box {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  min-height: 300px;
+}
+.status-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.95rem;
+}
+.status-item .ok { color: #28a745; font-weight: bold; }
+.status-item .fail { color: #dc3545; font-weight: bold; }
+.status-item .wait { color: #999; }
+
+/* ── Results tab ───────────────────────────────────────────────────────────── */
+.results-sidebar {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.report-frame {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: #fff;
+}
+
+.btn-download {
+  background: #21618C;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  width: 100%;
+  margin-top: 10px;
+  font-weight: 500;
+}
+.btn-download:hover {
+  opacity: 0.9;
+  color: #fff;
+}
+
+.placeholder-msg {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #999;
+  font-size: 1.1rem;
+}
