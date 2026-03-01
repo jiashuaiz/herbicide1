@@ -3,36 +3,40 @@
 ## Cursor Cloud specific instructions
 
 ### Project overview
-R-based data analysis project for herbicide resistance reporting in South-East Australian farms. The pipeline has 3 stages executed in order via R Markdown files:
+R-based data analysis project for herbicide resistance reporting in South-East Australian farms. Separated into three layers:
 
-1. `Merge.Rmd` — Merges resistance phenotype data with sample sizes (requires `tidyverse` pre-loaded: `Rscript -e 'library(tidyverse); rmarkdown::render("Merge.Rmd")'`)
-2. `Output_PNG.Rmd` — Generates histogram and map PNG images per farmer per herbicide
-3. `Report_html/Report_html_batch.Rmd` — Renders per-farmer HTML reports using `Report per farmer4.Rmd` as a child template
-
-### Data files
-The project expects data files in `../data/` relative to the workspace root. Since the workspace is at `/workspace/`, data lives in `/data/`. The `Report_html/` subdirectory also references `../data/` (resolving to `/workspace/data/`), so a symlink at `/workspace/data -> /data` is needed if running from the `Report_html/` directory.
-
-Similarly, generated images go to `../img/` (i.e., `/img/`), with a symlink at `/workspace/img -> /img` for cross-directory access.
-
-### Key gotchas
-- `Merge.Rmd` does not call `library(tidyverse)` itself; `pivot_wider` will fail unless tidyverse is loaded before rendering. Use: `Rscript -e 'library(tidyverse); rmarkdown::render("Merge.Rmd")'`
-- `Report_html_batch.Rmd` reads `combined_dataframe.txt` but `Merge.Rmd` writes `combined_dataframe.csv`. You may need to copy/rename the `.csv` to `.txt` for the batch report to work.
-- The `Report_html_batch.Rmd` must be rendered from within the `Report_html/` directory (its working directory matters for relative paths).
-- No linting or automated test framework exists in this repository. Validation is done by rendering each `.Rmd` file and checking the output.
+- **Analysis** (`R/analysis.R`, `R/data_loader.R`): Data merging, validation, statistics
+- **Visualization** (`R/visualization.R`): Histogram and gradient-map PNG generation
+- **Display** (`Report_html/`, `templates/`): Per-farmer HTML report templates and CSS
+- **Configuration** (`R/config.R`, `R/utils.R`): Centralized paths, settings, utilities
 
 ### Running the pipeline
+The single entry point is `run_pipeline.R`:
 ```bash
-# Step 1: Merge data
-cd /workspace && Rscript -e 'library(tidyverse); rmarkdown::render("Merge.Rmd")'
+cd /workspace
+Rscript run_pipeline.R              # all steps
+Rscript run_pipeline.R merge        # step 1 only
+Rscript run_pipeline.R images       # step 2 only
+Rscript run_pipeline.R reports      # step 3 only
+```
 
-# Step 2: Generate PNG images
+Individual Rmd files still work standalone:
+```bash
+cd /workspace && Rscript -e 'rmarkdown::render("Merge.Rmd")'
 cd /workspace && Rscript -e 'rmarkdown::render("Output_PNG.Rmd")'
-
-# Step 3: Generate HTML reports
 cd /workspace/Report_html && Rscript -e 'rmarkdown::render("Report_html_batch.Rmd")'
 ```
 
+### Data files
+The project expects data in `../data/` relative to the project root. On the cloud VM the data lives in `/data/` with a symlink at `/workspace/data -> /data`. Similarly, generated images go to `/img/` with `/workspace/img -> /img`.
+
+### Key gotchas
+- `R/config.R` auto-detects the project root via `.git` directory. All file paths flow from config — no hardcoded paths in analysis/visualization code.
+- The `Report per farmer4.Rmd` template is rendered as a standalone document (not a child Rmd). Variables (`farmer`, `df`, `config`, etc.) are passed via a `new.env()` render environment.
+- Chunk labels in the template are prefixed `template-` to avoid conflicts with the batch file's labels.
+- `Report_html_batch.Rmd` reads `combined_dataframe.txt` but `merge_resistance_data()` writes `.csv`. Copy/rename if running the batch Rmd standalone without `run_pipeline.R`.
+- Column access uses safe bracket notation (`df[[col]]`) instead of `eval(parse(...))` to prevent code injection.
+- No automated test framework exists. Validation is done by rendering each Rmd or running `run_pipeline.R` and checking outputs.
+
 ### System dependencies
-- R (>= 4.x), pandoc
-- R packages: `knitr`, `rmarkdown`, `tidyverse`, `maps`, `png` (plus `grid` from base R)
-- System libraries for building R packages: `libcurl4-openssl-dev`, `libssl-dev`, `libxml2-dev`, `libfontconfig1-dev`, `libharfbuzz-dev`, `libfribidi-dev`, `libfreetype6-dev`, `libpng-dev`, `libtiff5-dev`, `libjpeg-dev`
+R (>= 4.x), pandoc, and R packages: `knitr`, `rmarkdown`, `tidyverse`, `maps`, `png` (plus `grid` from base R).
