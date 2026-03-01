@@ -3,40 +3,37 @@
 ## Cursor Cloud specific instructions
 
 ### Project overview
-R-based data analysis project for herbicide resistance reporting in South-East Australian farms. Separated into three layers:
+Shiny web application for herbicide resistance reporting in South-East Australian farms. Users upload data, analysis runs on the backend, and farmers view their personalised reports in-browser.
 
+**Architecture layers:**
+- **Service** (`app.R`): Shiny web app — handles uploads, runs pipeline, serves reports
 - **Analysis** (`R/analysis.R`, `R/data_loader.R`): Data merging, validation, statistics
 - **Visualization** (`R/visualization.R`): Histogram and gradient-map PNG generation
-- **Display** (`Report_html/`, `templates/`): Per-farmer HTML report templates and CSS
-- **Configuration** (`R/config.R`, `R/utils.R`): Centralized paths, settings, utilities
+- **Reports** (`R/report.R`): Per-farmer HTML report rendering via Rmd templates
+- **Display** (`Report_html/`, `templates/`): Report templates and CSS
+- **Config** (`R/config.R`, `R/utils.R`): Centralized paths, settings, utilities
+- **Sample data** (`sample_data/`): Bundled example files for demo mode
 
-### Running the pipeline
-The single entry point is `run_pipeline.R`:
+### Running the service
 ```bash
-cd /workspace
-Rscript run_pipeline.R              # all steps
-Rscript run_pipeline.R merge        # step 1 only
-Rscript run_pipeline.R images       # step 2 only
-Rscript run_pipeline.R reports      # step 3 only
+cd /workspace && Rscript -e 'shiny::runApp("app.R", port = 3838, host = "0.0.0.0")'
 ```
 
-Individual Rmd files still work standalone:
+### CLI pipeline (still available)
 ```bash
-cd /workspace && Rscript -e 'rmarkdown::render("Merge.Rmd")'
-cd /workspace && Rscript -e 'rmarkdown::render("Output_PNG.Rmd")'
-cd /workspace/Report_html && Rscript -e 'rmarkdown::render("Report_html_batch.Rmd")'
+cd /workspace && Rscript run_pipeline.R             # all steps
+cd /workspace && Rscript run_pipeline.R merge        # step 1 only
+cd /workspace && Rscript run_pipeline.R images       # step 2 only
+cd /workspace && Rscript run_pipeline.R reports      # step 3 only
 ```
-
-### Data files
-The project expects data in `../data/` relative to the project root. On the cloud VM the data lives in `/data/` with a symlink at `/workspace/data -> /data`. Similarly, generated images go to `/img/` with `/workspace/img -> /img`.
 
 ### Key gotchas
-- `R/config.R` auto-detects the project root via `.git` directory. All file paths flow from config — no hardcoded paths in analysis/visualization code.
-- The `Report per farmer4.Rmd` template is rendered as a standalone document (not a child Rmd). Variables (`farmer`, `df`, `config`, etc.) are passed via a `new.env()` render environment.
-- Chunk labels in the template are prefixed `template-` to avoid conflicts with the batch file's labels.
-- `Report_html_batch.Rmd` reads `combined_dataframe.txt` but `merge_resistance_data()` writes `.csv`. Copy/rename if running the batch Rmd standalone without `run_pipeline.R`.
-- Column access uses safe bracket notation (`df[[col]]`) instead of `eval(parse(...))` to prevent code injection.
-- No automated test framework exists. Validation is done by rendering each Rmd or running `run_pipeline.R` and checking outputs.
+- `R/config.R` auto-detects the project root via `.git`. The Shiny app passes session-specific temp directories for `data_dir`, `img_dir`, and `report_dir` to isolate concurrent users.
+- The report template (`Report per farmer4.Rmd`) is rendered in a `new.env(parent = globalenv())`. Functions from `R/analysis.R` and `R/utils.R` must be sourced into the global environment before rendering.
+- Chunk labels in the template are prefixed `template-` to avoid conflicts with the batch Rmd.
+- Landscape gradient RDS files are optional for upload; sample gradient files are used as fallback.
+- Column access throughout uses safe bracket notation (`df[[col]]`) instead of `eval(parse(...))`.
+- No automated test framework exists. Validation is by running the Shiny app and checking generated reports.
 
 ### System dependencies
-R (>= 4.x), pandoc, and R packages: `knitr`, `rmarkdown`, `tidyverse`, `maps`, `png` (plus `grid` from base R).
+R (>= 4.x), pandoc, and R packages: `shiny`, `knitr`, `rmarkdown`, `tidyverse`, `maps`, `png` (plus `grid` from base R).

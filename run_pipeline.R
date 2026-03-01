@@ -13,6 +13,7 @@ source("R/utils.R")
 source("R/data_loader.R")
 source("R/analysis.R")
 source("R/visualization.R")
+source("R/report.R")
 
 config <- get_config()
 
@@ -36,40 +37,9 @@ if ("images" %in% steps) {
 # ── Step 3: Reports ───────────────────────────────────────────────────────────
 if ("reports" %in% steps) {
   message("\n=== Step 3: Generating per-farmer HTML reports ===")
-
-  library(png)
-  library(grid)
-
-  df <- load_combined_data(config)
-  list_farmers    <- unique(df$Farmer_Agronomist)
-  list_Herbicides <- config$herbicides
-  list_colours    <- config$colors
-  df_commercial_name_of_herbicide <- load_commercial_names(config)
-
-  template_path <- file.path(config$project_root, "Report_html", "Report per farmer4.Rmd")
-  ensure_dir(config$report_dir)
-
-  for (farmer in list_farmers) {
-    if (farmer == "None") next
-    safe_name   <- sanitize_name(farmer)
-    output_path <- file.path(config$report_dir, paste0(safe_name, ".html"))
-
-    render_env <- new.env(parent = globalenv())
-    render_env$farmer      <- farmer
-    render_env$df          <- df
-    render_env$config      <- config
-    render_env$list_Herbicides <- list_Herbicides
-    render_env$list_colours    <- list_colours
-    render_env$df_commercial_name_of_herbicide <- df_commercial_name_of_herbicide
-
-    rmarkdown::render(
-      template_path,
-      output_file = output_path,
-      envir       = render_env,
-      quiet       = TRUE
-    )
-    message("  Report: ", output_path)
-  }
+  farmers <- generate_all_reports(config, progress_fn = function(f) {
+    message("  Report: ", f)
+  })
 }
 
 message("\n=== Pipeline complete ===")

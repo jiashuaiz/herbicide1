@@ -15,6 +15,10 @@ Report_html/report/
 *_cache/
 *_files/
 
+# Shiny logs
+*.log
+rsconnect/
+
 # OS files
 .DS_Store
 Thumbs.db
