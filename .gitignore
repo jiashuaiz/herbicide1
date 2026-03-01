@@ -1,0 +1,20 @@
+# User data — never commit sensitive farmer information
+**/data/
+**/img/
+
+# Generated outputs
+Report_html/report/
+*.html
+!Report_html/*.Rmd
+
+# R temporary files
+.Rhistory
+.Rdata
+.RData
+*.knit.md
+*_cache/
+*_files/
+
+# OS files
+.DS_Store
+Thumbs.db
