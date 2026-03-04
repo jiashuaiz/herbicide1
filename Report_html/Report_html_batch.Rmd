@@ -5,45 +5,17 @@ date: "10/30/2020"
 
 ```{r batch-setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-library(png)
-library(grid)
 source("../R/config.R")
 source("../R/utils.R")
 source("../R/data_loader.R")
 source("../R/analysis.R")
+source("../R/report.R")
 config <- get_config()
 ```
 
-```{r load-data, include=FALSE}
-df <- load_combined_data(config)
-list_farmers    <- unique(df$Farmer_Agronomist)
-list_Herbicides <- config$herbicides
-list_colours    <- config$colors
-df_commercial_name_of_herbicide <- load_commercial_names(config)
-```
-
 ```{r render-reports, include=FALSE}
-ensure_dir(config$report_dir)
-
-for (farmer in list_farmers) {
-  if (farmer == "None") next
-  safe_name   <- sanitize_name(farmer)
-  output_path <- file.path(config$report_dir, paste0(safe_name, ".html"))
-
-  render_env <- new.env(parent = globalenv())
-  render_env$farmer      <- farmer
-  render_env$df          <- df
-  render_env$config      <- config
-  render_env$list_Herbicides <- list_Herbicides
-  render_env$list_colours    <- list_colours
-  render_env$df_commercial_name_of_herbicide <- df_commercial_name_of_herbicide
-
-  rmarkdown::render(
-    "Report per farmer4.Rmd",
-    output_file = output_path,
-    envir       = render_env,
-    quiet       = TRUE
-  )
-  message("Report generated: ", output_path)
-}
+farmers <- generate_all_reports(config, progress_fn = function(f) {
+  message("Report generated: ", f)
+})
+message("All ", length(farmers), " reports complete.")
 ```

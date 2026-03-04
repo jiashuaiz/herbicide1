@@ -106,8 +106,10 @@ generate_map <- function(df_all, sub_df, farmer, herbicide_idx, config) {
 
   # Heatmap
   par(fig = c(0, 0.88, 0, 1), mar = c(5, 5, 0, 2), xpd = FALSE)
+  z_lo <- max(1, round(min(Z) * ncolors))
+  z_hi <- min(ncolors, round(max(Z) * ncolors))
   image(x = predx, y = predy, z = Z,
-        col = color_gradient[round(min(Z) * ncolors):round(max(Z) * ncolors)],
+        col = color_gradient[z_lo:z_hi],
         xlab = "Longitude", ylab = "Latitude", asp = 1,
         xaxt = "n", yaxt = "n", frame.plot = FALSE)
 
@@ -161,8 +163,9 @@ generate_map <- function(df_all, sub_df, farmer, herbicide_idx, config) {
     # Draw farm points
     for (j in seq_len(n_farms)) {
       r <- sub_df_herb[[herbicide]][j]
+      ci <- min(ncolors, max(1, round(r * ncolors) + 1))
       points(farm_x[j], farm_y[j], col = "black",
-             bg = color_gradient[round(r * ncolors) + 1], pch = 19)
+             bg = color_gradient[ci], pch = 19)
     }
 
     # Compute label positions: radial placement from cluster centroid

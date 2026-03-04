@@ -1,4 +1,5 @@
 ---
+title: "Herbicide Resistance Report"
 author: JIASHUAI ZHU
 output: html_document
 ---
@@ -39,11 +40,11 @@ sub_df <- df[df$Farmer_Agronomist == farmer, ]
 
 <hr>
  
-This report contains information about herbicide resistance of <span style="color:#BF7EBE; font-weight:bold">Clethodim</span>, <span style="color:#FFBF7F; font-weight:bold">Glyphosate</span>, <span style="color:#8BA5F2; font-weight:bold">Sulfometuron</span>, and <span style="color:#FF7F7E; font-weight:bold">Terbuthylazine</span> of your farms.
+This report contains information about herbicide resistance of <span style="color:`r list_colours[1]`; font-weight:bold">Clethodim</span>, <span style="color:`r list_colours[2]`; font-weight:bold">Glyphosate</span>, <span style="color:`r list_colours[3]`; font-weight:bold">Sulfometuron</span>, and <span style="color:`r list_colours[4]`; font-weight:bold">Terbuthylazine</span> of your farms.
 
 * The <b>histograms</b> demonstrate the relative situation of your farms compared to your neighbours. The percentile scores indicate how many farms have resistance levels less than or equal to the resistance level of your farms. (For example, 23rd percentile means that 23% of farms we tested have resistance levels less than or equal to the resistance level of your farms; or in other words, your farm is less resistant (better) than 77% of farms we tested.)
 
-* The <b>gradient maps</b> give you a bigger view of the resistance gradient of four herbicides across South-East Australia, and where you farms locate.
+* The <b>gradient maps</b> give you a bigger view of the resistance gradient of four herbicides across South-East Australia, and where your farms are located.
 
  Collection date: November 2018
 
@@ -66,7 +67,7 @@ note <- c(
          "\n\n \u2022   Sulfometuron was applied at a recommended field rate of ",
          "400 g active ingredient per hectare, 30 days after germination."),
   paste0("\u2022   Terbuthylazine is a photosystem II (PSII) inhibitor. ",
-         "[Post-emergent] \n\n \u2022   Sulfometuron was applied at a recommended ",
+         "[Post-emergent] \n\n \u2022   Terbuthylazine was applied at a recommended ",
          "field rate of 1,050 g active ingredient per hectare, 30 days after germination.")
 )
 

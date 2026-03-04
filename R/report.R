@@ -31,12 +31,12 @@ generate_all_reports <- function(config, progress_fn = NULL) {
     render_env$list_colours    <- list_colours
     render_env$df_commercial_name_of_herbicide <- df_commercial
 
-    rmarkdown::render(
+    suppressWarnings(rmarkdown::render(
       template_path,
       output_file = output_path,
       envir       = render_env,
       quiet       = TRUE
-    )
+    ))
     farmers_generated <- c(farmers_generated, farmer)
     if (!is.null(progress_fn)) progress_fn(farmer)
   }

@@ -33,12 +33,19 @@ load_sample_sizes <- function(config) {
 }
 
 load_combined_data <- function(config) {
-  path_txt <- file.path(config$data_dir, "combined_dataframe.txt")
   path_csv <- file.path(config$data_dir, "combined_dataframe.csv")
-  path <- if (file.exists(path_txt)) path_txt else path_csv
-  if (!file.exists(path)) stop("Combined dataframe not found in: ", config$data_dir)
+  path_txt <- file.path(config$data_dir, "combined_dataframe.txt")
 
-  df <- read.csv(path, header = TRUE, na.strings = c("#N/A", "-"))
+  if (file.exists(path_csv)) {
+    df <- read.csv(path_csv, header = TRUE, na.strings = c("#N/A", "-"))
+  } else if (file.exists(path_txt)) {
+    first_line <- readLines(path_txt, n = 1)
+    reader <- if (grepl("\t", first_line)) read.delim else read.csv
+    df <- reader(path_txt, header = TRUE, na.strings = c("#N/A", "-"))
+  } else {
+    stop("Combined dataframe not found in: ", config$data_dir)
+  }
+
   for (c_idx in seq_len(ncol(df))) {
     if (c_idx >= 13) df[, c_idx] <- as.numeric(df[, c_idx])
   }

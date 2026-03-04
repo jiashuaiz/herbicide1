@@ -377,9 +377,10 @@ server <- function(input, output, session) {
   output$download_report <- downloadHandler(
     filename = function() paste0(sanitize_name(input$farmer_select), ".html"),
     content  = function(file) {
+      req(rv$report_dir, input$farmer_select)
       src <- file.path(rv$report_dir,
                        paste0(sanitize_name(input$farmer_select), ".html"))
-      file.copy(src, file)
+      if (file.exists(src)) file.copy(src, file)
     },
     contentType = "text/html"
   )
@@ -387,6 +388,7 @@ server <- function(input, output, session) {
   output$download_all <- downloadHandler(
     filename = function() "all_reports.zip",
     content  = function(file) {
+      req(rv$report_dir)
       owd <- setwd(rv$report_dir)
       on.exit(setwd(owd))
       utils::zip(file, list.files(".", pattern = "\\.html$"))
