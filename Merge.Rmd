@@ -1,36 +1,21 @@
 ---
 title: "Merge df of resistance and sample size"
 ---
-```{r, setup, include=F}
-knitr::opts_chunk$set(echo = F)
-getwd()
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+source("R/config.R")
+source("R/utils.R")
+source("R/data_loader.R")
+source("R/analysis.R")
+config <- get_config()
 ```
 
-```{r, input-resistance}
-df_resistance = read.delim("../data/POP_PHENO_DATA.txt", header=TRUE, na.strings=c("#N/A", "-"))
+```{r merge}
+df_combined <- merge_resistance_data(config)
 ```
 
-```{r, input-sample-size}
-# read file
-df_sample_size = read.delim("../data/SAMPLE_SIZES.txt", header=TRUE, na.strings=c("#N/A", "-"))
-# tidy data
-df_sample_size_tidied <- pivot_wider(df_sample_size, names_from = HERBICIDE, values_from = SAMPLE_SIZE)
-
-# change column name
-## get the list of herbicide
-List_HERBICIDE = unique(df_sample_size$HERBICIDE)
-## capitalize the first letter
-List_HERBICIDE = tolower(List_HERBICIDE)
-List_Herbicide = paste0(toupper(substring(List_HERBICIDE, 1,1)), substring(List_HERBICIDE, 2))
-
-List_Herbicide_sampleSize = paste0(List_Herbicide, "_sampleSize") 
-colnames(df_sample_size_tidied) <- c("Accession_Name", List_Herbicide_sampleSize)
+```{r summary}
+cat("Merged", nrow(df_combined), "rows across", ncol(df_combined), "columns.\n")
+cat("Farmers:", length(unique(df_combined$Farmer_Agronomist)), "\n")
+cat("Output:", file.path(config$data_dir, "combined_dataframe.csv"), "\n")
 ```
-
-```{r, combine}
-df_combine <- merge(df_resistance, df_sample_size_tidied, by="Accession_Name", all = TRUE)
-write.csv(df_combine,"../data/combined_dataframe.csv", row.names = FALSE)
-
-```
-
-
